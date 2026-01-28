@@ -1,0 +1,80 @@
+<aside class="left-sidebar" data-sidebarbg="skin6">
+    <div class="scroll-sidebar" data-sidebarbg="skin6">
+        <nav class="sidebar-nav">
+            <ul id="sidebarnav">
+
+                {{-- DASHBOARD --}}
+                <li class="sidebar-item">
+                    @if(auth()->user()->role == 'admin')
+                        <a class="sidebar-link" href="{{ route('admin.dashboard') }}">
+                    @elseif(auth()->user()->role == 'petugas')
+                        <a class="sidebar-link" href="{{ route('petugas.dashboard') }}">
+                    @endif
+                            <i data-feather="home" class="feather-icon"></i>
+                            <span class="hide-menu">Dashboard</span>
+                        </a>
+                </li>
+
+                <li class="list-divider"></li>
+
+                {{-- ADMIN --}}
+                @if(auth()->user()->role == 'admin')
+                    <li class="nav-small-cap"><span class="hide-menu">Manajemen</span></li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('kategori.index') }}">
+                            <i data-feather="tag" class="feather-icon"></i>
+                            <span class="hide-menu">Kategori</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('lokasi.index') }}">
+                            <i data-feather="map-pin" class="feather-icon"></i>
+                            <span class="hide-menu">Lokasi</span>
+                        </a>
+                    </li>
+                @endif
+
+                {{-- ADMIN + PETUGAS --}}
+                @if(in_array(auth()->user()->role, ['admin','petugas']))
+                    <li class="nav-small-cap"><span class="hide-menu">Operasional</span></li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('barang.index') }}">
+                            <i data-feather="box" class="feather-icon"></i>
+                            <span class="hide-menu">Barang</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('peminjaman.index') }}">
+                            <i data-feather="arrow-up-right" class="feather-icon"></i>
+                            <span class="hide-menu">Peminjaman</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('pengembalian.index') }}">
+                            <i data-feather="arrow-down-left" class="feather-icon"></i>
+                            <span class="hide-menu">Pengembalian</span>
+                        </a>
+                    </li>
+                @endif
+
+                {{-- LOGOUT --}}
+                <li class="list-divider"></li>
+                <li class="sidebar-item">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button class="sidebar-link btn btn-link text-left w-100">
+                            <i data-feather="log-out" class="feather-icon"></i>
+                            <span class="hide-menu">Logout</span>
+                        </button>
+                    </form>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</aside>
