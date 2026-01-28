@@ -3,7 +3,7 @@
 
 <h3>Edit Lokasi</h3>
 
-<form method="POST" action="{{ route('lokasi.update', $lokasi->id) }}">
+<form method="POST" action="{{ route('admin.lokasi.update', $lokasi->id) }}">
     @csrf
     @method('PUT')
     <div class="mb-3">
@@ -14,7 +14,7 @@
         @enderror
     </div>
     <button class="btn btn-primary">Update</button>
-    <a href="{{ route('lokasi.index') }}" class="btn btn-secondary">Batal</a>
+    <a href="{{ route('admin.lokasi.index') }}" class="btn btn-secondary">Batal</a>
 </form>
 
 @endsection

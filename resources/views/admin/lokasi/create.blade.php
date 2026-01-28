@@ -3,7 +3,7 @@
 
 <h3>Tambah Lokasi</h3>
 
-<form method="POST" action="{{ route('lokasi.store') }}">
+<form method="POST" action="{{ route('admin.lokasi.store') }}">
     @csrf
     <div class="mb-3">
         <label>Nama Lokasi</label>
@@ -13,7 +13,7 @@
         @enderror
     </div>
     <button class="btn btn-primary">Simpan</button>
-    <a href="{{ route('lokasi.index') }}" class="btn btn-secondary">Batal</a>
+    <a href="{{ route('admin.lokasi.index') }}" class="btn btn-secondary">Batal</a>
 </form>
 
 @endsection

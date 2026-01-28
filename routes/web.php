@@ -3,12 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Controllers\BidangController;
-use App\Http\Controllers\BarangController;
-use App\Http\Controllers\PeminjamanController;
-use App\Http\Controllers\PengembalianController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\LokasiController;
+use App\Http\Controllers\{
+    BidangController,
+    BarangController,
+    PeminjamanController,
+    PengembalianController,
+    KategoriController,
+    LokasiController
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +18,7 @@ use App\Http\Controllers\LokasiController;
 |--------------------------------------------------------------------------
 */
 Auth::routes();
+
 Route::get('/', function () {
     return view('auth.login');
 })->name('login');
@@ -23,60 +26,64 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN DASHBOARD
+| ADMIN AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
 
-    // MASTER DATA
-    Route::resource('bidang', BidangController::class);
-    Route::resource('kategori', KategoriController::class);
-    Route::resource('lokasi', LokasiController::class);
+        // Master Data
+        Route::resource('bidang', BidangController::class);
+        Route::resource('kategori', KategoriController::class);
+        Route::resource('lokasi', LokasiController::class);
 
-    // CRUD PETUGAS DI DALAM BIDANG
-    Route::post('bidang/{bidang}/petugas',
-        [BidangController::class,'storePetugas']
-    )->name('bidang.petugas.store');
+        // Petugas dalam Bidang
+        Route::post('bidang/{bidang}/petugas',
+            [BidangController::class, 'storePetugas']
+        )->name('bidang.petugas.store');
 
-    Route::delete('petugas/{user}',
-        [BidangController::class,'destroyPetugas']
-    )->name('bidang.petugas.destroy');
+        Route::delete('petugas/{user}',
+            [BidangController::class, 'destroyPetugas']
+        )->name('bidang.petugas.destroy');
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| PETUGAS DASHBOARD
+| PETUGAS AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:petugas'])->group(function () {
+Route::middleware(['auth', 'role:petugas'])
+    ->prefix('petugas')
+    ->name('petugas.')
+    ->group(function () {
 
-    // Dashboard utama petugas
-    Route::get('/petugas/dashboard', function () {
-        return view('petugas.dashboard');
-    })->name('petugas.dashboard');
+        Route::get('/dashboard', function () {
+            return view('petugas.dashboard');
+        })->name('dashboard');
 
-    // Sub dashboard per bidang
-    Route::get('/petugas/akademik', fn() => view('petugas.akademik'))->name('petugas.akademik');
-    Route::get('/petugas/keuangan', fn() => view('petugas.keuangan'))->name('petugas.keuangan');
-    Route::get('/petugas/kemahasiswaan', fn() => view('petugas.kemahasiswaan'))->name('petugas.kemahasiswaan');
-    Route::get('/petugas/umum', fn() => view('petugas.umum'))->name('petugas.umum');
+        Route::get('/akademik', fn () => view('petugas.akademik'))->name('akademik');
+        Route::get('/keuangan', fn () => view('petugas.keuangan'))->name('keuangan');
+        Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');
+        Route::get('/umum', fn () => view('petugas.umum'))->name('umum');
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| DATA OPERASIONAL (ADMIN + PETUGAS)
+| OPERASIONAL (ADMIN + PETUGAS)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:admin,petugas'])->group(function () {
+Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
 
     Route::resource('barang', BarangController::class);
     Route::resource('peminjaman', PeminjamanController::class);
     Route::resource('pengembalian', PengembalianController::class);
-
 });

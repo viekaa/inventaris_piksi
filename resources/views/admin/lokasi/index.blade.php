@@ -3,7 +3,7 @@
 
 <h3>Data Lokasi</h3>
 
-<a href="{{ route('lokasi.create') }}" class="btn btn-primary mb-2">Tambah Lokasi</a>
+<a href="{{ route('admin.lokasi.create') }}" class="btn btn-primary mb-2">Tambah Lokasi</a>
 
 <table class="table table-bordered">
     <thead>
@@ -19,9 +19,9 @@
             <td>{{ $index+1 }}</td>
             <td>{{ $lokasi->nama_lokasi }}</td>
             <td>
-                <a href="{{ route('lokasi.show', $lokasi->id) }}" class="btn btn-info btn-sm">Lihat</a>
-                <a href="{{ route('lokasi.edit', $lokasi->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="{{ route('lokasi.destroy', $lokasi->id) }}" method="POST" style="display:inline">
+                <a href="{{ route('admin.lokasi.show', $lokasi->id) }}" class="btn btn-info btn-sm">Lihat</a>
+                <a href="{{ route('admin.lokasi.edit', $lokasi->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="{{ route('admin.lokasi.destroy', $lokasi->id) }}" method="POST" style="display:inline">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-danger btn-sm" onclick="return confirm('Yakin mau hapus?')">Hapus</button>

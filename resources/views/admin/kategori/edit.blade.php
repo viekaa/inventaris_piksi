@@ -3,7 +3,7 @@
 
 <h3>Edit Kategori</h3>
 
-<form method="POST" action="{{ route('kategori.update', $kategori->id) }}">
+<form method="POST" action="{{ route('admin.kategori.update', $kategori->id) }}">
     @csrf
     @method('PUT')
     <div class="mb-3">
@@ -14,7 +14,7 @@
         @enderror
     </div>
     <button class="btn btn-primary">Update</button>
-    <a href="{{ route('kategori.index') }}" class="btn btn-secondary">Batal</a>
+    <a href="{{ route('admin.kategori.index') }}" class="btn btn-secondary">Batal</a>
 </form>
 
 @endsection

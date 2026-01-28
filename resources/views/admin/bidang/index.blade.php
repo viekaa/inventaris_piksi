@@ -4,7 +4,7 @@
 <div class="container">
     <h3>Data Bidang</h3>
 
-    <a href="{{ route('bidang.create') }}" class="btn btn-primary mb-3">
+    <a href="{{ route('admin.bidang.create') }}" class="btn btn-primary mb-3">
         + Tambah Bidang
     </a>
 
@@ -19,9 +19,9 @@
             <td>{{ $b->nama_bidang }}</td>
             <td>{{ $b->users_count }}</td>
             <td>
-                <a href="{{ route('bidang.show',$b->id) }}" class="btn btn-info btn-sm">Detail</a>
-                <a href="{{ route('bidang.edit',$b->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="{{ route('bidang.destroy',$b->id) }}" method="POST" style="display:inline">
+                <a href="{{ route('admin.bidang.show',$b->id) }}" class="btn btn-info btn-sm">Detail</a>
+                <a href="{{ route('admin.bidang.edit',$b->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="{{ route('admin.bidang.destroy',$b->id) }}" method="POST" style="display:inline">
                     @csrf @method('DELETE')
                     <button class="btn btn-danger btn-sm"
                         onclick="return confirm('Hapus bidang?')">Hapus</button>

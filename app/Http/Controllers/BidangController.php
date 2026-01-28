@@ -11,14 +11,14 @@ class BidangController extends Controller
 {
     // list bidang
     public function index(){
-        return view('bidang.index', [
+        return view('admin.bidang.index', [
             'bidangs' => Bidang::withCount('users')->get()
         ]);
     }
 
     // form tambah bidang
     public function create(){
-        return view('bidang.create');
+        return view('admin.bidang.create');
     }
 
     // simpan bidang
@@ -28,18 +28,18 @@ class BidangController extends Controller
         ]);
 
         Bidang::create($r->all());
-        return redirect()->route('bidang.index');
+        return redirect()->route('admin.bidang.index');
     }
 
     // DETAIL BIDANG + LIST PETUGAS
     public function show(Bidang $bidang){
         $bidang->load('users');
-        return view('bidang.show', compact('bidang'));
+        return view('admin.bidang.show', compact('bidang'));
     }
 
     // edit bidang
     public function edit(Bidang $bidang){
-        return view('bidang.edit', compact('bidang'));
+        return view('admin.bidang.edit', compact('bidang'));
     }
 
     public function update(Request $r, Bidang $bidang){
@@ -48,7 +48,7 @@ class BidangController extends Controller
         ]);
 
         $bidang->update($r->all());
-        return redirect()->route('bidang.index');
+        return redirect()->route('admin.bidang.index');
     }
 
     public function destroy(Bidang $bidang){

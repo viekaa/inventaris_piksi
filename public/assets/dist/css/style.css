@@ -7524,8 +7524,8 @@ a.text-purple:hover, a.text-purple:focus {
     color: inherit;
     border-color: #e8eef3; } }
 
-/*============================================================== 
- For all pages 
+/*==============================================================
+ For all pages
  ============================================================== */
 #main-wrapper {
   width: 100%;
@@ -9032,6 +9032,26 @@ strong {
   border-radius: 50%;
   margin: 5px;
   font-size: 11px; }
+
+  /* ===== Logo Navbar ===== */
+.navbar-header .navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+/* icon logo */
+.navbar-header .logo-icon img {
+    height: 36px;      /* kecil & rapi */
+    width: auto;
+}
+
+/* teks logo */
+.navbar-header .logo-text img {
+    height: 26px;      /* INI KUNCI UTAMANYA */
+    width: auto;
+    margin-left: 8px;
+}
+
 
 @media (max-width: 767.98px) {
   .fc-toolbar .fc-left,

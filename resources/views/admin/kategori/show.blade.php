@@ -22,6 +22,6 @@
     </tr>
 </table>
 
-<a href="{{ route('kategori.index') }}" class="btn btn-secondary">Kembali</a>
+<a href="{{ route('admin.kategori.index') }}" class="btn btn-secondary">Kembali</a>
 
 @endsection

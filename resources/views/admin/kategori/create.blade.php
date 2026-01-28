@@ -3,7 +3,7 @@
 
 <h3>Tambah Kategori</h3>
 
-<form method="POST" action="{{ route('kategori.store') }}">
+<form method="POST" action="{{ route('admin.kategori.store') }}">
     @csrf
     <div class="mb-3">
         <label>Nama Kategori</label>
@@ -13,7 +13,7 @@
         @enderror
     </div>
     <button class="btn btn-primary">Simpan</button>
-    <a href="{{ route('kategori.index') }}" class="btn btn-secondary">Batal</a>
+    <a href="{{ route('admin.kategori.index') }}" class="btn btn-secondary">Batal</a>
 </form>
 
 @endsection

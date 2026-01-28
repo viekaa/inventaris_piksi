@@ -6,7 +6,7 @@
 
     <hr>
     <h5>Tambah Petugas</h5>
-    <form action="{{ route('bidang.petugas.store',$bidang->id) }}" method="POST">
+    <form action="{{ route('admin.bidang.petugas.store',$bidang->id) }}" method="POST">
         @csrf
         <div class="row">
             <div class="col">
@@ -37,7 +37,7 @@
             <td>{{ $u->name }}</td>
             <td>{{ $u->email }}</td>
             <td>
-                <form action="{{ route('bidang.petugas.destroy',$u->id) }}" method="POST">
+                <form action="{{ route('admin.bidang.petugas.destroy',$u->id) }}" method="POST">
                     @csrf @method('DELETE')
                     <button class="btn btn-danger btn-sm"
                         onclick="return confirm('Hapus petugas?')">
@@ -49,6 +49,6 @@
         @endforeach
     </table>
 
-    <a href="{{ route('bidang.index') }}" class="btn btn-secondary">Kembali</a>
+    <a href="{{ route('admin.bidang.index') }}" class="btn btn-secondary">Kembali</a>
 </div>
 @endsection

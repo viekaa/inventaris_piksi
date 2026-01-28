@@ -22,14 +22,14 @@
                     <li class="nav-small-cap"><span class="hide-menu">Manajemen</span></li>
 
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('kategori.index') }}">
+                        <a class="sidebar-link" href="{{ route('admin.kategori.index') }}">
                             <i data-feather="tag" class="feather-icon"></i>
                             <span class="hide-menu">Kategori</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('lokasi.index') }}">
+                        <a class="sidebar-link" href="{{ route('admin.lokasi.index') }}">
                             <i data-feather="map-pin" class="feather-icon"></i>
                             <span class="hide-menu">Lokasi</span>
                         </a>
