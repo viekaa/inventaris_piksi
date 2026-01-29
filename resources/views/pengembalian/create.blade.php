@@ -6,19 +6,34 @@
 <form method="POST" action="{{ route('pengembalian.store') }}">
 @csrf
 
-<input type="hidden" name="peminjaman_id" value="{{ $peminjaman->id }}">
+<div class="form-group">
+    <label>Pilih Peminjaman</label>
+    <select name="peminjaman_id" class="form-control" required>
+        <option value="">-- Pilih --</option>
+        @foreach($peminjaman as $p)
+            <option value="{{ $p->id }}">
+                {{ $p->barang->nama }} |
+                {{ $p->nama_peminjam }} |
+                {{ $p->tgl_pinjam }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-<p>Barang: <b>{{ $peminjaman->barang->nama_barang }}</b></p>
-<p>Jumlah: {{ $peminjaman->jumlah }}</p>
+<div class="form-group">
+    <label>Tanggal Kembali</label>
+    <input type="date" name="tgl_kembali" class="form-control" required>
+</div>
 
-<input type="date" name="tgl_kembali" class="form-control mb-2">
+<div class="form-group">
+    <label>Kondisi Saat Kembali</label>
+    <textarea name="kondisi_saat_kembali" class="form-control" required></textarea>
+</div>
 
-<select name="kondisi_saat_kembali" class="form-control mb-2">
-<option value="baik">Baik</option>
-<option value="rusak">Rusak</option>
-<option value="perlu_perbaikan">Perlu Perbaikan</option>
-</select>
+<button type="submit" class="btn btn-primary">
+    Simpan Pengembalian
+</button>
 
-<button class="btn btn-success">Simpan Pengembalian</button>
 </form>
+
 @endsection

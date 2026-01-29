@@ -65,10 +65,6 @@ Route::middleware(['auth', 'role:petugas'])
     ->name('petugas.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('petugas.dashboard');
-        })->name('dashboard');
-
         Route::get('/akademik', fn () => view('petugas.akademik'))->name('akademik');
         Route::get('/keuangan', fn () => view('petugas.keuangan'))->name('keuangan');
         Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');

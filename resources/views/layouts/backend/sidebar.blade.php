@@ -7,11 +7,22 @@
                 <li class="sidebar-item">
                     @if(auth()->user()->role == 'admin')
                         <a class="sidebar-link" href="{{ route('admin.dashboard') }}">
-                    @elseif(auth()->user()->role == 'petugas')
-                        <a class="sidebar-link" href="{{ route('petugas.dashboard') }}">
+                   @elseif(auth()->user()->role == 'petugas')
+                                @php
+                                    $map = [
+                                        'Akademik' => 'petugas.akademik',
+                                        'Keuangan' => 'petugas.keuangan',
+                                        'Kemahasiswaan' => 'petugas.kemahasiswaan',
+                                        'Umum' => 'petugas.umum',
+                                    ];
+
+                                    $route = $map[auth()->user()->bidang->nama_bidang] ?? 'petugas.umum';
+                                @endphp
+
+                                <a class="sidebar-link" href="{{ route($route) }}">
                     @endif
-                            <i data-feather="home" class="feather-icon"></i>
-                            <span class="hide-menu">Dashboard</span>
+                    <i data-feather="home" class="feather-icon"></i>
+                    <span class="hide-menu">Dashboard</span>
                         </a>
                 </li>
 

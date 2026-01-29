@@ -7,20 +7,20 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                              <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h4 class="card-title mb-0">Data Kategori</h4>
+                             <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="card-title mb-0">Data Kategori</h4>
 
-                                    <div class="position-relative w-25">
-                                        <i class="fas fa-search position-absolute text-muted"
-                                        style="top:50%; left:15px; transform:translateY(-50%);"></i>
+                                <div class="position-relative w-25">
+                                    <i class="fas fa-search position-absolute text-muted"
+                                    style="top:50%; left:18px; transform:translateY(-50%);"></i>
 
-                                        <input type="text"
-                                            id="searchKategori"
-                                            class="form-control rounded-pill ps-5"
-                                            placeholder="Cari kategori...">
-                                    </div>
+                                    <input type="text"
+                                        id="searchKategori"
+                                        class="form-control rounded-pill"
+                                        style="padding-left:45px;"
+                                        placeholder="Cari kategori...">
                                 </div>
-
+                            </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead class="bg-primary text-white">
@@ -70,4 +70,20 @@
                         </div>
                     </div>
                 </div>
+                                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const input = document.getElementById('searchKategori');
+
+                    input.addEventListener('keyup', function () {
+                        let keyword = this.value.toLowerCase();
+                        let rows = document.querySelectorAll('table tbody tr');
+
+                        rows.forEach(row => {
+                            let text = row.innerText.toLowerCase();
+                            row.style.display = text.includes(keyword) ? '' : 'none';
+                        });
+                    });
+                });
+                </script>
+
 @endsection
