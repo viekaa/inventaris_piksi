@@ -11,6 +11,9 @@ class Peminjaman extends Model
     protected $fillable = [
         'barang_id',
         'nama_peminjam',
+        'npm',
+        'jurusan_id',
+        'angkatan',
         'jumlah',
         'tgl_pinjam',
         'tgl_kembali_rencana',
@@ -20,6 +23,11 @@ class Peminjaman extends Model
     public function barang()
     {
         return $this->belongsTo(Barang::class);
+    }
+
+    public function jurusan()
+    {
+        return $this->belongsTo(Jurusan::class);
     }
 
     public function pengembalian()

@@ -64,7 +64,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="col-md-6">
                                     <div class="detail-item">
                                         <label class="detail-label">
@@ -85,6 +84,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                         <!-- Informasi Stok -->
@@ -307,6 +307,7 @@ body {
     margin-bottom: 0;
 }
 
+
 .section-title {
     display: flex;
     align-items: center;
@@ -369,7 +370,7 @@ body {
 /* ===== BADGES ===== */
 .badge-kategori {
     display: inline-block;
-    padding: 6px 14px;
+    padding: 6px 10px;
     background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
     color: #fff;
     border-radius: 8px;

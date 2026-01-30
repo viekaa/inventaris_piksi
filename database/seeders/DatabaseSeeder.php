@@ -6,6 +6,8 @@ use App\Models\Kategori;
 use App\Models\Lokasi;
 use App\Models\Bidang;
 use App\Models\Barang;
+use App\Models\Fakultas;
+use App\Models\Jurusan;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -30,6 +32,8 @@ class DatabaseSeeder extends Seeder
             PeminjamanSeeder::class,
             PengembalianSeeder::class,
             BidangSeeder::class,
+            FakultasJurusanSeeder::class,
+
         ]);
     }
 }
