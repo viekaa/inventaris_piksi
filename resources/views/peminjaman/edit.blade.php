@@ -12,14 +12,14 @@
                 Edit Peminjaman
             </h5>
 
-            <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary btn-sm">
+            <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
 
         <div class="card-body">
 
-            <form action="{{ route('peminjaman.update', $peminjaman->id) }}" method="POST">
+            <form action="{{ route('petugas.peminjaman.update', $peminjaman->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 

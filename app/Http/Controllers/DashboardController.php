@@ -10,21 +10,28 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if ($user->role == 'admin') {
-            $barang = Barang::count();
-            $peminjaman = Peminjaman::count();
-            $pengembalian = Pengembalian::count();
-            $stokHabis = Barang::where('stok','<=',5)->count();
-        } else {
-            $barang = Barang::where('bidang_id',$user->bidang_id)->count();
-            $peminjaman = Peminjaman::whereHas('barang',fn($q)=>$q->where('bidang_id',$user->bidang_id))->count();
-            $pengembalian = Pengembalian::whereHas('peminjaman.barang',fn($q)=>$q->where('bidang_id',$user->bidang_id))->count();
-            $stokHabis = Barang::where('bidang_id',$user->bidang_id)->where('stok','<=',5)->count();
-        }
+    if ($user->role == 'admin') {
+        $barang = Barang::count();
+        $peminjaman = Peminjaman::count();
+        $pengembalian = Pengembalian::count();
+        $stokHabis = Barang::where('stok','<=',5)->count();
+    } else {
+        $barang = Barang::where('bidang_id', $user->bidang_id)->count();
+        $peminjaman = Peminjaman::where('bidang_id', $user->bidang_id)->count();
 
-        return view('dashboard.index',compact('barang','peminjaman','pengembalian','stokHabis'));
+        $pengembalian = Pengembalian::whereHas('peminjaman', function($q) use ($user){
+            $q->where('bidang_id', $user->bidang_id);
+        })->count();
+
+        $stokHabis = Barang::where('bidang_id', $user->bidang_id)
+                           ->where('stok','<=',5)
+                           ->count();
     }
+
+    return view('dashboard.index', compact('barang','peminjaman','pengembalian','stokHabis'));
+}
+
 }

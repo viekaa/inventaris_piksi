@@ -48,30 +48,40 @@
                 @endif
 
                 {{-- ADMIN + PETUGAS --}}
-                @if(in_array(auth()->user()->role, ['admin','petugas']))
-                    <li class="nav-small-cap"><span class="hide-menu">Operasional</span></li>
+@if(in_array(auth()->user()->role, ['admin','petugas']))
+    <li class="nav-small-cap"><span class="hide-menu">Operasional</span></li>
 
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('barang.index') }}">
-                            <i data-feather="box" class="feather-icon"></i>
-                            <span class="hide-menu">Barang</span>
-                        </a>
-                    </li>
+    {{-- BARANG --}}
+    <li class="sidebar-item">
+        <a class="sidebar-link" href="{{ route('barang.index') }}">
+            <i data-feather="box" class="feather-icon"></i>
+            <span class="hide-menu">Barang</span>
+        </a>
+    </li>
 
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('peminjaman.index') }}">
-                            <i data-feather="arrow-up-right" class="feather-icon"></i>
-                            <span class="hide-menu">Peminjaman</span>
-                        </a>
-                    </li>
+    {{-- PEMINJAMAN --}}
+    <li class="sidebar-item">
+        <a class="sidebar-link"
+           href="{{ auth()->user()->role == 'admin'
+                ? route('admin.peminjaman.index')
+                : route('petugas.peminjaman.index') }}">
+            <i data-feather="arrow-up-right" class="feather-icon"></i>
+            <span class="hide-menu">Peminjaman</span>
+        </a>
+    </li>
 
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('pengembalian.index') }}">
-                            <i data-feather="arrow-down-left" class="feather-icon"></i>
-                            <span class="hide-menu">Pengembalian</span>
-                        </a>
-                    </li>
-                @endif
+    {{-- PENGEMBALIAN --}}
+    <li class="sidebar-item">
+        <a class="sidebar-link"
+           href="{{ auth()->user()->role == 'admin'
+                ? route('admin.pengembalian.index')
+                : route('petugas.pengembalian.index') }}">
+            <i data-feather="arrow-down-left" class="feather-icon"></i>
+            <span class="hide-menu">Pengembalian</span>
+        </a>
+    </li>
+@endif
+
 
                 {{-- LOGOUT --}}
                 <li class="list-divider"></li>

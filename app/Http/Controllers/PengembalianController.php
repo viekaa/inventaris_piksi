@@ -13,7 +13,7 @@ class PengembalianController extends Controller
     {
         $user = Auth::user();
 
-        $query = Pengembalian::with('peminjaman.barang','peminjaman.user');
+        $query = Pengembalian::with('peminjaman.barang');
 
         // Petugas hanya lihat pengembalian dari bidangnya
         if($user->role == 'petugas'){
@@ -27,57 +27,70 @@ class PengembalianController extends Controller
         ]);
     }
 
-  public function create()
-{
-    $user = Auth::user();
+    public function create()
+    {
+        // 🔒 Admin tidak boleh input pengembalian
+        if(Auth::user()->role == 'admin'){
+            abort(403,'Admin hanya boleh melihat data pengembalian');
+        }
 
-    $query = Peminjaman::whereDoesntHave('pengembalian')
-                        ->with('barang');
+        $user = Auth::user();
 
-    if($user->role == 'petugas'){
-        $query->whereHas('barang', function($q) use ($user){
-            $q->where('bidang_id', $user->bidang_id);
-        });
+        // Ambil peminjaman yang belum dikembalikan
+        $query = Peminjaman::whereDoesntHave('pengembalian')
+                            ->with('barang');
+
+        // Petugas hanya bisa akses peminjaman dari bidangnya
+        if($user->role == 'petugas'){
+            $query->whereHas('barang', function($q) use ($user){
+                $q->where('bidang_id', $user->bidang_id);
+            });
+        }
+
+        return view('pengembalian.create',[
+            'peminjaman' => $query->get()
+        ]);
     }
-
-    return view('pengembalian.create',[
-        'peminjaman' => $query->get()
-    ]);
-}
 
     public function store(Request $r)
     {
+        // 🔒 Admin tidak boleh simpan pengembalian
+        if(Auth::user()->role == 'admin'){
+            abort(403,'Admin hanya boleh melihat data pengembalian');
+        }
+
         $r->validate([
             'peminjaman_id' => 'required|exists:peminjamans,id',
             'tgl_kembali' => 'required|date',
-            'kondisi_saat_kembali' => 'required'
+            'kondisi_saat_kembali' => 'required|in:baik,rusak,perlu_perbaikan'
         ]);
 
-        $peminjaman = Peminjaman::with(['barang','pengembalian'])->findOrFail($r->peminjaman_id);
+        $peminjaman = Peminjaman::with(['barang','pengembalian'])
+                        ->findOrFail($r->peminjaman_id);
 
-        // petugas tidak boleh kembalikan barang luar bidangnya
-        if(Auth::user()->role=='petugas' &&
+        // 🔒 Petugas hanya boleh kembalikan barang bidangnya
+        if(Auth::user()->role == 'petugas' &&
            $peminjaman->barang->bidang_id != Auth::user()->bidang_id){
-            abort(403,'Bukan peminjaman dari bidang kamu');
+            abort(403,'Bukan peminjaman dari bidang Anda');
         }
 
-        // cegah double pengembalian
+        // Cegah double pengembalian
         if($peminjaman->pengembalian){
             return back()->with('error','Peminjaman ini sudah dikembalikan');
         }
 
-        // simpan pengembalian
+        // Simpan pengembalian
         Pengembalian::create([
             'peminjaman_id' => $peminjaman->id,
             'tgl_kembali' => $r->tgl_kembali,
             'kondisi_saat_kembali' => $r->kondisi_saat_kembali
         ]);
 
-        // kembalikan stok
+        // Kembalikan stok
         $peminjaman->barang->increment('stok', $peminjaman->jumlah);
 
-        return redirect()->route('pengembalian.index')
-                         ->with('ok','Pengembalian berhasil, stok barang kembali');
+        return redirect()->route('petugas.pengembalian.index')
+                         ->with('ok','Pengembalian berhasil disimpan, stok barang telah dikembalikan');
     }
 
     public function show(Pengembalian $pengembalian)
@@ -86,24 +99,68 @@ class PengembalianController extends Controller
         return view('pengembalian.show', compact('pengembalian'));
     }
 
-    public function destroy(Pengembalian $pengembalian)
+    public function edit(Pengembalian $pengembalian)
     {
+        // 🔒 Admin tidak boleh edit
+        if(Auth::user()->role == 'admin'){
+            abort(403,'Admin hanya boleh melihat data pengembalian');
+        }
+
         $this->authorizePengembalian($pengembalian);
 
-        // jika pengembalian dihapus, stok harus dikurangi lagi
+        return view('pengembalian.edit', compact('pengembalian'));
+    }
+
+    public function update(Request $r, Pengembalian $pengembalian)
+    {
+        // 🔒 Admin tidak boleh update
+        if(Auth::user()->role == 'admin'){
+            abort(403,'Admin hanya boleh melihat data pengembalian');
+        }
+
+        $this->authorizePengembalian($pengembalian);
+
+        $r->validate([
+            'tgl_kembali' => 'required|date',
+            'kondisi_saat_kembali' => 'required|in:baik,rusak,perlu_perbaikan'
+        ]);
+
+        $pengembalian->update([
+            'tgl_kembali' => $r->tgl_kembali,
+            'kondisi_saat_kembali' => $r->kondisi_saat_kembali
+        ]);
+
+        return redirect()->route('pengembalian.index')
+                         ->with('ok','Data pengembalian berhasil diperbarui');
+    }
+
+    public function destroy(Pengembalian $pengembalian)
+    {
+        // 🔒 Admin tidak boleh hapus
+        if(Auth::user()->role == 'admin'){
+            abort(403,'Admin hanya boleh melihat data pengembalian');
+        }
+
+        $this->authorizePengembalian($pengembalian);
+
+        // Jika pengembalian dihapus, stok harus dikurangi lagi
         $pengembalian->peminjaman->barang
                      ->decrement('stok', $pengembalian->peminjaman->jumlah);
 
         $pengembalian->delete();
 
-        return back()->with('ok','Pengembalian berhasil dihapus');
+        return redirect()->route('pengembalian.index')
+                         ->with('ok','Data pengembalian berhasil dihapus, stok telah disesuaikan');
     }
 
+    /* 🔒 SECURITY - Authorization bidang */
     private function authorizePengembalian($pengembalian)
     {
-        if(Auth::user()->role=='petugas' &&
-           $pengembalian->peminjaman->barang->bidang_id != Auth::user()->bidang_id){
-            abort(403,'Akses bukan bidang kamu');
+        $user = Auth::user();
+
+        if($user->role == 'petugas' &&
+           $pengembalian->peminjaman->barang->bidang_id != $user->bidang_id){
+            abort(403,'Anda tidak memiliki akses ke pengembalian dari bidang lain');
         }
     }
 }

@@ -10,47 +10,52 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
+    /* ============================
+        INDEX
+    ============================ */
     public function index()
     {
         $user = Auth::user();
 
         $query = Peminjaman::with(['barang','jurusan.fakultas']);
 
-        // Petugas hanya lihat peminjaman dari bidangnya
-        if($user->role == 'petugas'){
-            $query->whereHas('barang', function($q) use ($user){
+        if ($user->role == 'petugas') {
+            $query->whereHas('barang', function ($q) use ($user) {
                 $q->where('bidang_id', $user->bidang_id);
             });
         }
 
         return view('peminjaman.index', [
-            'peminjaman' => $query->get()
+            'peminjaman' => $query->latest()->get()
         ]);
     }
 
+    /* ============================
+        CREATE
+    ============================ */
     public function create()
     {
+        $this->onlyPetugas();
+
         $user = Auth::user();
 
-        // Petugas hanya boleh pilih barang bidangnya
-        $barang = $user->role == 'admin'
-            ? Barang::all()
-            : Barang::where('bidang_id', $user->bidang_id)->get();
+        $barang = Barang::where('bidang_id', $user->bidang_id)->get();
 
-        // Ambil jurusan + fakultas lalu kelompokkan per fakultas
         $jurusans = Jurusan::with('fakultas')
             ->orderBy('nama_jurusan')
             ->get()
             ->groupBy(fn($j) => $j->fakultas->nama_fakultas);
 
-        return view('peminjaman.create', [
-            'barang'   => $barang,
-            'jurusans' => $jurusans
-        ]);
+        return view('peminjaman.create', compact('barang','jurusans'));
     }
 
+    /* ============================
+        STORE
+    ============================ */
     public function store(Request $r)
     {
+        $this->onlyPetugas();
+
         $r->validate([
             'barang_id' => 'required|exists:barangs,id',
             'nama_peminjam' => 'required',
@@ -65,13 +70,11 @@ class PeminjamanController extends Controller
 
         $barang = Barang::findOrFail($r->barang_id);
 
-        // 🔒 Petugas tidak boleh pinjam barang bidang lain
-        if(Auth::user()->role=='petugas' && $barang->bidang_id != Auth::user()->bidang_id){
+        if ($barang->bidang_id != Auth::user()->bidang_id) {
             abort(403,'Barang bukan bidang kamu');
         }
 
-        // 🔒 Stok tidak boleh minus
-        if($barang->stok < $r->jumlah){
+        if ($barang->stok < $r->jumlah) {
             return back()->with('error','Stok tidak mencukupi');
         }
 
@@ -85,80 +88,130 @@ class PeminjamanController extends Controller
             'tgl_pinjam' => $r->tgl_pinjam,
             'tgl_kembali_rencana' => $r->tgl_kembali_rencana,
             'kondisi_saat_pinjam' => $r->kondisi_saat_pinjam,
+            'status' => 'dipinjam'
         ]);
 
-        // Kurangi stok
         $barang->decrement('stok', $r->jumlah);
 
-        return redirect()->route('peminjaman.index')->with('ok','Peminjaman berhasil');
+        return redirect()->route('petugas.peminjaman.index')
+                         ->with('ok','Peminjaman berhasil');
     }
 
+    /* ============================
+        SHOW
+    ============================ */
     public function show(Peminjaman $peminjaman)
     {
-        $this->authorizePeminjaman($peminjaman);
+        $this->authorizeBidang($peminjaman);
         return view('peminjaman.show', compact('peminjaman'));
     }
 
+    /* ============================
+        EDIT
+    ============================ */
     public function edit(Peminjaman $peminjaman)
     {
+        $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
-        // Ambil jurusan + fakultas lalu kelompokkan per fakultas
         $jurusans = Jurusan::with('fakultas')
             ->orderBy('nama_jurusan')
             ->get()
             ->groupBy(fn($j) => $j->fakultas->nama_fakultas);
 
-        return view('peminjaman.edit', [
-            'peminjaman' => $peminjaman,
-            'jurusans'   => $jurusans
-        ]);
+        return view('peminjaman.edit', compact('peminjaman','jurusans'));
     }
 
+    /* ============================
+        UPDATE
+    ============================ */
     public function update(Request $r, Peminjaman $peminjaman)
     {
+        $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
         $r->validate([
-            'nama_peminjam'=>'required',
-            'npm'=>'required',
-            'jurusan_id'=>'required|exists:jurusans,id',
-            'angkatan'=>'required|digits:4',
-            'tgl_pinjam'=>'required|date',
-            'tgl_kembali_rencana'=>'required|date|after_or_equal:tgl_pinjam',
-            'kondisi_saat_pinjam'=>'required'
+            'nama_peminjam' => 'required',
+            'npm' => 'required',
+            'jurusan_id' => 'required|exists:jurusans,id',
+            'angkatan' => 'required|digits:4',
+            'tgl_pinjam' => 'required|date',
+            'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam',
+            'kondisi_saat_pinjam' => 'required'
         ]);
 
-        $peminjaman->update([
-            'nama_peminjam' => $r->nama_peminjam,
-            'npm' => $r->npm,
-            'jurusan_id' => $r->jurusan_id,
-            'angkatan' => $r->angkatan,
-            'tgl_pinjam' => $r->tgl_pinjam,
-            'tgl_kembali_rencana' => $r->tgl_kembali_rencana,
-            'kondisi_saat_pinjam' => $r->kondisi_saat_pinjam,
-        ]);
+        $peminjaman->update($r->only([
+            'nama_peminjam','npm','jurusan_id','angkatan',
+            'tgl_pinjam','tgl_kembali_rencana','kondisi_saat_pinjam'
+        ]));
 
-        return redirect()->route('peminjaman.index')->with('ok','Peminjaman diupdate');
+        return redirect()->route('petugas.peminjaman.index')
+                         ->with('ok','Peminjaman diupdate');
     }
 
-    public function destroy(Peminjaman $peminjaman)
+    /* ============================
+        KEMBALIKAN BARANG
+    ============================ */
+    public function kembalikan(Peminjaman $peminjaman)
     {
+        $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
-        // kembalikan stok saat hapus
+        if ($peminjaman->status === 'dikembalikan') {
+            return back()->with('error','Barang sudah dikembalikan');
+        }
+
         $peminjaman->barang->increment('stok', $peminjaman->jumlah);
 
+        $peminjaman->update([
+            'status' => 'dikembalikan'
+        ]);
+
+        return back()->with('ok','Barang berhasil dikembalikan');
+    }
+
+    /* ============================
+        DELETE
+    ============================ */
+    public function destroy(Peminjaman $peminjaman)
+    {
+        $this->onlyPetugas();
+        $this->authorizePeminjaman($peminjaman);
+
+        // hanya yang masih dipinjam boleh dihapus
+        $peminjaman->barang->increment('stok', $peminjaman->jumlah);
         $peminjaman->delete();
+
         return back()->with('ok','Peminjaman dihapus & stok dikembalikan');
     }
 
-    /* 🔒 SECURITY */
+    /* ============================
+        SECURITY
+    ============================ */
+
+    private function onlyPetugas()
+    {
+        if (Auth::user()->role !== 'petugas') {
+            abort(403,'Admin hanya boleh melihat data');
+        }
+    }
+
+    private function authorizeBidang($peminjaman)
+    {
+        if (
+            Auth::user()->role === 'petugas' &&
+            $peminjaman->barang->bidang_id != Auth::user()->bidang_id
+        ) {
+            abort(403,'Akses peminjaman bukan bidang kamu');
+        }
+    }
+
     private function authorizePeminjaman($peminjaman)
     {
-        if(Auth::user()->role=='petugas' &&
-           $peminjaman->barang->bidang_id != Auth::user()->bidang_id){
-            abort(403,'Akses peminjaman bukan bidang kamu');
+        $this->authorizeBidang($peminjaman);
+
+        if ($peminjaman->status === 'dikembalikan') {
+            abort(403,'Barang sudah dikembalikan, data dikunci');
         }
     }
 }

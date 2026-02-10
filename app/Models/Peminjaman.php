@@ -18,6 +18,7 @@ class Peminjaman extends Model
         'tgl_pinjam',
         'tgl_kembali_rencana',
         'kondisi_saat_pinjam'
+        'status'  
     ];
 
     public function barang()

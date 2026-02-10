@@ -20,7 +20,7 @@
                     </div>
 
                     <!-- Form -->
-                    <form action="{{ route('peminjaman.store') }}" method="POST" class="custom-form">
+                    <form action="{{ route('petugas.peminjaman.store') }}" method="POST" class="custom-form">
                         @csrf
 
                         <div class="row">
@@ -242,7 +242,7 @@
 
                         <!-- Form Actions -->
                         <div class="form-actions">
-                            <a href="{{ route('peminjaman.index') }}" class="btn-back">
+                            <a href="{{ route('petugas.peminjaman.index') }}" class="btn-back">
                                 <i class="fas fa-arrow-left"></i>
                                 <span>Kembali</span>
                             </a>

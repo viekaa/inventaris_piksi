@@ -3,7 +3,7 @@
 
 <h3>Edit Pengembalian</h3>
 
-<form method="POST" action="{{ route('pengembalian.update',$pengembalian->id) }}">
+<form method="POST" action="{{ route('petugas.pengembalian.update',$pengembalian->id) }}">
 @csrf
 @method('PUT')
 

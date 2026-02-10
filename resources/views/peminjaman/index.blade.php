@@ -53,83 +53,149 @@
                             </div>
 
                             <!-- Tombol Tambah -->
-                            <a href="{{ route('peminjaman.create') }}" class="btn-add">
-                                <i class="fas fa-plus-circle"></i>
-                                <span>Tambah Peminjaman</span>
-                            </a>
+                        @if(auth()->user()->role == 'petugas')
+                        <a href="{{ route('petugas.peminjaman.create') }}" class="btn-add">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Tambah Peminjaman</span>
+                        </a>
+                        @endif
+
 
                         </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table custom-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-no">No</th>
-                                    <th class="col-nama-peminjam">Nama Peminjam</th>
-                                    <th class="col-barang">Barang</th>
-                                    <th class="text-center col-jumlah">Jumlah</th>
-                                    <th class="text-center col-tgl-pinjam">Tanggal Pinjam</th>
-                                    <th class="text-center col-rencana-kembali">Rencana Kembali</th>
-                                    <th class="text-center col-aksi">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($peminjaman as $item)
-                                <tr>
-                                    <td class="col-number">{{ $loop->iteration }}</td>
-                                    <td class="col-nama">{{ $item->nama_peminjam }}</td>
-                                    <td>
-                                        <span class="badge-kategori">
-                                            {{ $item->barang->nama_barang }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge-stok">{{ $item->jumlah }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge-total">{{ \Carbon\Carbon::parse($item->tgl_pinjam)->format('d/m/Y') }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge-kondisi" style="background: #E8F8F0; color: #2E7D32;">
-                                            {{ \Carbon\Carbon::parse($item->tgl_kembali_rencana)->format('d/m/Y') }}
-                                        </span>
-                                    </td>
+                 <div class="table-responsive">
+          <table class="table custom-table">
+    <thead>
+        <tr>
+            <th class="col-no">No</th>
+            <th class="col-nama">Nama Peminjam</th>
+            <th class="col-barang">Barang</th>
+            <th class="col-jumlah text-center">Jumlah</th>
 
-                                    <td>
-                                        <div class="action-buttons">
-                                            <!-- Detail -->
-                                            <a href="{{ route('peminjaman.show', $item->id) }}"
-                                            class="btn-action btn-detail"
-                                            title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+            @if(auth()->user()->role == 'admin')
+                <th class="col-bidang text-center">Bidang</th>
+                <th class="col-tanggal text-center">Tanggal Pinjam</th>
+            @else
+                <th class="col-tanggal text-center">Tanggal Pinjam</th>
+                <th class="col-tanggal text-center">Rencana Kembali</th>
+            @endif
 
-                                            <!-- Edit -->
-                                            <a href="{{ route('peminjaman.edit', $item->id) }}"
-                                               class="btn-action btn-edit"
-                                               title="Edit">
-                                                <i class="far fa-edit"></i>
-                                            </a>
+            <th class="col-status text-center">Status</th> {{-- ✅ Tambah Status --}}
+            <th class="col-aksi text-center">Aksi</th>
+        </tr>
+    </thead>
 
-                                            <!-- Hapus -->
-                                            <form action="{{ route('peminjaman.destroy', $item->id) }}"
-                                                  method="POST"
-                                                  class="d-inline-block"
-                                                  onsubmit="return confirm('Yakin ingin menghapus peminjaman ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-action btn-delete" title="Hapus">
-                                                    <i class="far fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                  </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+    <tbody>
+        @foreach ($peminjaman as $item)
+        <tr>
+
+            {{-- No --}}
+            <td class="col-number">{{ $loop->iteration }}</td>
+
+            {{-- Nama --}}
+            <td class="col-nama">{{ $item->nama_peminjam }}</td>
+
+            {{-- Barang --}}
+            <td>
+                <span class="badge-kategori">
+                    {{ $item->barang->nama_barang }}
+                </span>
+            </td>
+
+            {{-- Jumlah --}}
+            <td class="text-center">
+                <span class="badge-kondisi" style="background:#E8F8F0;color:#2E7D32">
+                    {{ $item->jumlah }}
+                </span>
+            </td>
+
+            {{-- ADMIN --}}
+            @if(auth()->user()->role == 'admin')
+                <td class="text-center">
+                    <span class="badge-stok">
+                        {{ $item->barang->bidang->nama_bidang ?? '-' }}
+                    </span>
+                </td>
+
+                <td class="text-center">
+                    <span class="badge-total">
+                        {{ \Carbon\Carbon::parse($item->tgl_pinjam)->format('d/m/Y') }}
+                    </span>
+                </td>
+
+            {{-- PETUGAS --}}
+            @else
+                <td class="text-center">
+                    <span class="badge-total">
+                        {{ \Carbon\Carbon::parse($item->tgl_pinjam)->format('d/m/Y') }}
+                    </span>
+                </td>
+
+                <td class="text-center">
+                    <span class="badge-total">
+                        {{ \Carbon\Carbon::parse($item->tgl_kembali_rencana)->format('d/m/Y') }}
+                    </span>
+                </td>
+            @endif
+
+            {{-- STATUS --}}
+            <td class="text-center">
+                @if($item->status == 'dipinjam')
+                    <span class="badge bg-warning">Dipinjam</span>
+                @else
+                    <span class="badge bg-success">Dikembalikan</span>
+                @endif
+            </td>
+
+            {{-- AKSI --}}
+            <td>
+                <div class="action-buttons">
+
+                    {{-- Detail --}}
+                    <a href="{{ route('petugas.peminjaman.show', $item->id) }}"
+                       class="btn-action btn-detail" title="Detail">
+                        <i class="fas fa-eye"></i>
+                    </a>
+
+                    {{-- Edit & Delete hanya untuk petugas + status dipinjam --}}
+                    @if(auth()->user()->role == 'petugas' && $item->status == 'dipinjam')
+                        <a href="{{ route('petugas.peminjaman.edit', $item->id) }}"
+                           class="btn-action btn-edit">
+                            <i class="far fa-edit"></i>
+                        </a>
+
+                        <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}"
+                              method="POST" class="d-inline"
+                              onsubmit="return confirm('Yakin ingin menghapus?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn-action btn-delete">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        </form>
+
+                        {{-- Tombol Kembalikan --}}
+                        <form action="{{ route('peminjaman.kembalikan', $item->id) }}"
+                              method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn-action btn-success"
+                                    title="Kembalikan">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </form>
+                    @endif
+
+                </div>
+            </td>
+
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+
+</div>
+
 
                 </div>
             </div>
@@ -375,6 +441,7 @@ body {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.2px;
+    margin-left: -15px;
 }
 
 .badge-stok,

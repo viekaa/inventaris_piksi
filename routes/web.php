@@ -52,6 +52,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('petugas/{user}',
             [BidangController::class, 'destroyPetugas']
         )->name('bidang.petugas.destroy');
+
+        // Admin hanya boleh MELIHAT data operasional
+        Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
 });
 
 
@@ -69,17 +73,22 @@ Route::middleware(['auth', 'role:petugas'])
         Route::get('/keuangan', fn () => view('petugas.keuangan'))->name('keuangan');
         Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');
         Route::get('/umum', fn () => view('petugas.umum'))->name('umum');
+
+        // Operasional hanya untuk petugas (FULL CRUD)
+        Route::resource('peminjaman', PeminjamanController::class);
+        Route::resource('pengembalian', PengembalianController::class);
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| OPERASIONAL (ADMIN + PETUGAS)
+| OPERASIONAL UMUM (ADMIN + PETUGAS)
 |--------------------------------------------------------------------------
+| Barang boleh dilihat semua, tapi CRUD tetap kamu kontrol di controller
 */
 Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
-
     Route::resource('barang', BarangController::class);
-    Route::resource('peminjaman', PeminjamanController::class);
-    Route::resource('pengembalian', PengembalianController::class);
 });
+Route::post('/peminjaman/{peminjaman}/kembalikan',
+    [PeminjamanController::class, 'kembalikan']
+)->name('peminjaman.kembalikan');

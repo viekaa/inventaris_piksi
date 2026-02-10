@@ -16,16 +16,18 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    protected function redirectTo()
+    /**
+     * Redirect user after login based on role and bidang
+     */
+    protected function authenticated($request, $user)
     {
-        $user = Auth::user();
-
+        // Admin redirect
         if ($user->role === 'admin') {
-            return '/admin/dashboard';
+            return redirect('/admin/dashboard');
         }
 
+        // Petugas redirect
         if ($user->role === 'petugas') {
-
             $map = [
                 'Akademik' => 'akademik',
                 'Keuangan' => 'keuangan',
@@ -33,13 +35,13 @@ class LoginController extends Controller
                 'Umum' => 'umum',
             ];
 
-            return '/petugas/' . (
-                $user->bidang && isset($map[$user->bidang->nama_bidang])
-                    ? $map[$user->bidang->nama_bidang]
-                    : 'umum'
-            );
+            // aman kalau bidang NULL
+            $bidangName = $user->bidang->nama_bidang ?? null;
+
+            return redirect('/petugas/' . ($bidangName && isset($map[$bidangName]) ? $map[$bidangName] : 'umum'));
         }
 
-        return '/home';
+        // default redirect
+        return redirect('/home');
     }
 }
