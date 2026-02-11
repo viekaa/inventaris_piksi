@@ -9,9 +9,16 @@ return new class extends Migration {
     {
         Schema::create('pengembalians', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('peminjaman_id')->constrained('peminjamans')->cascadeOnDelete();
-            $table->date('tgl_kembali');
-            $table->string('kondisi_saat_kembali');
+
+            $table->foreignId('peminjaman_id')
+                ->constrained('peminjamans')
+                ->cascadeOnDelete();
+
+            $table->date('tgl_kembali_real'); // tanggal kembali sebenarnya
+            $table->integer('hari_telat')->default(0);
+            $table->enum('kondisi_saat_kembali', ['baik','rusak','perlu_perbaikan']);
+            $table->text('catatan')->nullable();
+
             $table->timestamps();
         });
     }

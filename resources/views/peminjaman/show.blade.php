@@ -183,20 +183,31 @@
 
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="detail-actions-peminjaman">
-                        <a href="{{ route('petugas.peminjaman.index') }}" class="btn-back-peminjaman">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Kembali ke Daftar</span>
-                        </a>
-                        <div class="detail-actions-right-peminjaman">
-                            <a href="{{ route('petugas.peminjaman.edit', $peminjaman->id) }}" class="btn-edit-peminjaman">
-                                <i class="far fa-edit"></i>
-                                <span>Edit Peminjaman</span>
-                            </a>
-                        </div>
-                    </div>
+             <div class="detail-actions-peminjaman">
+                {{-- TOMBOL BACK --}}
+                @if(auth()->user()->role == 'admin')
+                    <a href="{{ route('admin.peminjaman.index') }}" class="btn-back-peminjaman">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Daftar</span>
+                    </a>
+                @else
+                    <a href="{{ route('petugas.peminjaman.index') }}" class="btn-back-peminjaman">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Daftar</span>
+                    </a>
+                @endif
 
+                {{-- TOMBOL EDIT (HANYA PETUGAS) --}}
+                @if(auth()->user()->role == 'petugas' && $peminjaman->status == 'dipinjam')
+                    <div class="detail-actions-right-peminjaman">
+                        <a href="{{ route('petugas.peminjaman.edit', $peminjaman->id) }}" class="btn-edit-peminjaman">
+                            <i class="far fa-edit"></i>
+                            <span>Edit Peminjaman</span>
+                        </a>
+                    </div>
+                @endif
+
+            </div>
                 </div>
             </div>
 

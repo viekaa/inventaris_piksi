@@ -89,9 +89,31 @@
                                     <td class="text-center">
                                         <span class="badge-jumlah-pengembalian">{{ $item->peminjaman->jumlah }}</span>
                                     </td>
-                                    <td class="text-center">
-                                        <span class="badge-tanggal-pengembalian">{{ \Carbon\Carbon::parse($item->tgl_kembali)->format('d/m/Y') }}</span>
+                                 <td class="text-center">
+                                        @php
+                                            $tglKembali = \Carbon\Carbon::parse($item->tgl_kembali);
+                                            $tglRencana = \Carbon\Carbon::parse($item->peminjaman->tgl_kembali_rencana);
+                                            $telat = $tglKembali->gt($tglRencana);
+                                            $selisih = $tglKembali->diffInDays($tglRencana);
+                                        @endphp
+
+                                        <div>
+                                            <span class="badge-tanggal-pengembalian">
+                                                {{ $tglKembali->format('d/m/Y') }}
+                                            </span>
+
+                                            @if($telat)
+                                                <div style="font-size:11px;color:#c62828;font-weight:600;">
+                                                    Telat {{ $selisih }} hari
+                                                </div>
+                                            @else
+                                                <div style="font-size:11px;color:#2e7d32;font-weight:600;">
+                                                    Tepat waktu
+                                                </div>
+                                            @endif
+                                        </div>
                                     </td>
+
                                     <td class="text-center">
                                         @php
                                             $badge = match($item->kondisi_saat_kembali) {
@@ -108,17 +130,22 @@
 
                                     <td>
                                         <div class="action-buttons-pengembalian">
-                                            <!-- Detail - Both Admin & Petugas -->
-                                            <a href="{{ route('petugas.pengembalian.show', $item->id) }}"
-                                            class="btn-action-pengembalian btn-detail-pengembalian"
-                                            title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+
+                                                                        {{-- Detail --}}
+                                            @if(auth()->user()->role == 'admin')
+                                                <a href="{{ route('admin.pengembalian.show', $item->id) }}" class="btn-action btn-detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @else
+                                                <a href="{{ route('petugas.pengembalian.show', $item->id) }}" class="btn-action btn-detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endif
 
                                             <!-- Edit & Delete - Only Petugas -->
                                             @if(auth()->user()->role == 'petugas')
                                             <a href="{{ route('petugas.pengembalian.edit', $item->id) }}"
-                                               class="btn-action-pengembalian btn-edit-pengembalian"
+                                               class="btn-action btn-edit-pengembalian"
                                                title="Edit">
                                                 <i class="far fa-edit"></i>
                                             </a>
@@ -129,7 +156,7 @@
                                                   onsubmit="return confirm('Yakin ingin menghapus pengembalian ini? Stok akan disesuaikan kembali.')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn-action-pengembalian btn-delete-pengembalian" title="Hapus">
+                                                <button type="submit" class="btn-action btn-delete-pengembalian" title="Hapus">
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
                                             </form>
@@ -424,7 +451,8 @@ body {
     align-items: center;
 }
 
-.btn-action-pengembalian {
+
+.btn-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -439,12 +467,12 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.btn-detail-pengembalian {
+.btn-detail {
     background: #ffc107;
     color: #fff;
 }
 
-.btn-detail-pengembalian:hover {
+.btn-detail:hover {
     background: #e0a800;
     color: #fff;
     transform: translateY(-3px) scale(1.05);

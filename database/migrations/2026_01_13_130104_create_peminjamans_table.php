@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('nama_peminjam');
             $table->string('npm');
 
-            // 🔑 Relasi ke tabel jurusans
             $table->foreignId('jurusan_id')
                   ->constrained()
                   ->cascadeOnDelete();
@@ -28,11 +27,15 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->date('tgl_pinjam');
             $table->date('tgl_kembali_rencana');
+
             $table->enum('kondisi_saat_pinjam', ['baik', 'rusak', 'perlu_perbaikan']);
+
+            // status peminjaman
+            $table->enum('status', ['dipinjam', 'dikembalikan'])->default('dipinjam');
 
             $table->timestamps();
         });
-    }
+    } // ⬅️ ini yang tadi HILANG
 
     public function down(): void
     {

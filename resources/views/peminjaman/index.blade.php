@@ -3,19 +3,8 @@
 @section('content')
 
 <div class="container-fluid">
-
-    <!-- Success Message -->
-    @if(session('ok'))
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-check-circle me-2" style="font-size: 20px;"></i>
-            <div>
-                <strong>Berhasil!</strong> {{ session('ok') }}
-            </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    @endif
+
 
     <!-- Error Message -->
     @if(session('error'))
@@ -65,7 +54,7 @@
                     </div>
 
                  <div class="table-responsive">
-          <table class="table custom-table">
+        <table class="table custom-table">
     <thead>
         <tr>
             <th class="col-no">No</th>
@@ -153,10 +142,16 @@
                 <div class="action-buttons">
 
                     {{-- Detail --}}
-                    <a href="{{ route('petugas.peminjaman.show', $item->id) }}"
-                       class="btn-action btn-detail" title="Detail">
+                 @if(auth()->user()->role == 'admin')
+                    <a href="{{ route('admin.peminjaman.show', $item->id) }}" class="btn-action btn-detail">
                         <i class="fas fa-eye"></i>
                     </a>
+                @else
+                    <a href="{{ route('petugas.peminjaman.show', $item->id) }}" class="btn-action btn-detail">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                @endif
+
 
                     {{-- Edit & Delete hanya untuk petugas + status dipinjam --}}
                     @if(auth()->user()->role == 'petugas' && $item->status == 'dipinjam')
@@ -174,16 +169,6 @@
                                 <i class="far fa-trash-alt"></i>
                             </button>
                         </form>
-
-                        {{-- Tombol Kembalikan --}}
-                        <form action="{{ route('peminjaman.kembalikan', $item->id) }}"
-                              method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn-action btn-success"
-                                    title="Kembalikan">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </form>
                     @endif
 
                 </div>
@@ -192,7 +177,7 @@
         </tr>
         @endforeach
     </tbody>
-</table>
+        </table>
 
 </div>
 
@@ -208,6 +193,27 @@
 :root {
     --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+}
+/* Biar dropdown bisa keluar */
+.table td,
+.table tr {
+    overflow: visible !important;
+}
+
+/* Container tombol aksi */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: visible !important;
+}
+
+/* Dropdown kondisi */
+.select-kondisi {
+    height: 34px;
+    padding: 4px 8px;
+    font-size: 13px;
+    border-radius: 8px;
 }
 
 body {

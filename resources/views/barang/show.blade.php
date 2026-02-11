@@ -42,7 +42,7 @@
                                 <i class="fas fa-info-circle"></i>
                                 Informasi Utama
                             </h5>
-                            <div class="row g-4">
+                            <div class="row g-5">
                                 <div class="col-md-6">
                                     <div class="detail-item">
                                         <label class="detail-label">
@@ -64,6 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="detail-item">
                                         <label class="detail-label">
@@ -84,7 +85,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
                         <!-- Informasi Stok -->
@@ -93,7 +93,7 @@
                                 <i class="fas fa-cubes"></i>
                                 Informasi Stok
                             </h5>
-                            <div class="row g-4">
+                            <div class="row g-5">
                                 <div class="col-md-6">
                                     <div class="detail-item">
                                         <label class="detail-label">
@@ -159,7 +159,7 @@
                                 <i class="fas fa-clipboard-check"></i>
                                 Kondisi Barang
                             </h5>
-                            <div class="row g-4">
+                            <div class="row g-5">
                                 <div class="col-12">
                                     <div class="kondisi-card" style="background: {{ $badge['bg'] }}; border-left: 4px solid {{ $badge['text'] }};">
                                         <div class="kondisi-icon" style="color: {{ $badge['text'] }};">
@@ -307,7 +307,6 @@ body {
     margin-bottom: 0;
 }
 
-
 .section-title {
     display: flex;
     align-items: center;
@@ -332,6 +331,7 @@ body {
     border-radius: 12px;
     border: 1px solid var(--color-gray-200);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
 }
 
 .detail-item:hover {
@@ -350,7 +350,7 @@ body {
     color: var(--color-gray-500);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .detail-label i {
@@ -370,7 +370,7 @@ body {
 /* ===== BADGES ===== */
 .badge-kategori {
     display: inline-block;
-    padding: 6px 10px;
+    padding: 6px 14px;
     background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
     color: #fff;
     border-radius: 8px;

@@ -48,7 +48,8 @@
                 @endif
 
                 {{-- ADMIN + PETUGAS --}}
-@if(in_array(auth()->user()->role, ['admin','petugas']))
+        @if(in_array(auth()->user()->role, ['admin','petugas']))
+        <li class="list-divider"></li>
     <li class="nav-small-cap"><span class="hide-menu">Operasional</span></li>
 
     {{-- BARANG --}}

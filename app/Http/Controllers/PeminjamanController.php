@@ -5,21 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Peminjaman;
 use App\Models\Barang;
 use App\Models\Jurusan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
-    /* ============================
+    /* =====================================================
         INDEX
-    ============================ */
+    ===================================================== */
     public function index()
     {
         $user = Auth::user();
 
         $query = Peminjaman::with(['barang','jurusan.fakultas']);
 
-        if ($user->role == 'petugas') {
+        // Petugas hanya melihat barang dari bidangnya
+        if ($user->role === 'petugas') {
             $query->whereHas('barang', function ($q) use ($user) {
                 $q->where('bidang_id', $user->bidang_id);
             });
@@ -30,28 +32,29 @@ class PeminjamanController extends Controller
         ]);
     }
 
-    /* ============================
+    /* =====================================================
         CREATE
-    ============================ */
+    ===================================================== */
     public function create()
     {
         $this->onlyPetugas();
 
         $user = Auth::user();
 
+        // Barang hanya dari bidang petugas
         $barang = Barang::where('bidang_id', $user->bidang_id)->get();
 
         $jurusans = Jurusan::with('fakultas')
             ->orderBy('nama_jurusan')
             ->get()
-            ->groupBy(fn($j) => $j->fakultas->nama_fakultas);
+            ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
 
         return view('peminjaman.create', compact('barang','jurusans'));
     }
 
-    /* ============================
+    /* =====================================================
         STORE
-    ============================ */
+    ===================================================== */
     public function store(Request $r)
     {
         $this->onlyPetugas();
@@ -70,10 +73,12 @@ class PeminjamanController extends Controller
 
         $barang = Barang::findOrFail($r->barang_id);
 
+        // Cegah petugas pinjam barang dari bidang lain
         if ($barang->bidang_id != Auth::user()->bidang_id) {
             abort(403,'Barang bukan bidang kamu');
         }
 
+        // Cek stok
         if ($barang->stok < $r->jumlah) {
             return back()->with('error','Stok tidak mencukupi');
         }
@@ -91,24 +96,26 @@ class PeminjamanController extends Controller
             'status' => 'dipinjam'
         ]);
 
+        // Kurangi stok
         $barang->decrement('stok', $r->jumlah);
 
         return redirect()->route('petugas.peminjaman.index')
-                         ->with('ok','Peminjaman berhasil');
+            ->with('ok','Peminjaman berhasil disimpan');
     }
 
-    /* ============================
+    /* =====================================================
         SHOW
-    ============================ */
+    ===================================================== */
     public function show(Peminjaman $peminjaman)
     {
         $this->authorizeBidang($peminjaman);
+
         return view('peminjaman.show', compact('peminjaman'));
     }
 
-    /* ============================
+    /* =====================================================
         EDIT
-    ============================ */
+    ===================================================== */
     public function edit(Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
@@ -117,14 +124,14 @@ class PeminjamanController extends Controller
         $jurusans = Jurusan::with('fakultas')
             ->orderBy('nama_jurusan')
             ->get()
-            ->groupBy(fn($j) => $j->fakultas->nama_fakultas);
+            ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
 
         return view('peminjaman.edit', compact('peminjaman','jurusans'));
     }
 
-    /* ============================
+    /* =====================================================
         UPDATE
-    ============================ */
+    ===================================================== */
     public function update(Request $r, Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
@@ -141,53 +148,38 @@ class PeminjamanController extends Controller
         ]);
 
         $peminjaman->update($r->only([
-            'nama_peminjam','npm','jurusan_id','angkatan',
-            'tgl_pinjam','tgl_kembali_rencana','kondisi_saat_pinjam'
+            'nama_peminjam',
+            'npm',
+            'jurusan_id',
+            'angkatan',
+            'tgl_pinjam',
+            'tgl_kembali_rencana',
+            'kondisi_saat_pinjam'
         ]));
 
         return redirect()->route('petugas.peminjaman.index')
-                         ->with('ok','Peminjaman diupdate');
+            ->with('ok','Peminjaman berhasil diupdate');
     }
 
-    /* ============================
-        KEMBALIKAN BARANG
-    ============================ */
-    public function kembalikan(Peminjaman $peminjaman)
-    {
-        $this->onlyPetugas();
-        $this->authorizePeminjaman($peminjaman);
-
-        if ($peminjaman->status === 'dikembalikan') {
-            return back()->with('error','Barang sudah dikembalikan');
-        }
-
-        $peminjaman->barang->increment('stok', $peminjaman->jumlah);
-
-        $peminjaman->update([
-            'status' => 'dikembalikan'
-        ]);
-
-        return back()->with('ok','Barang berhasil dikembalikan');
-    }
-
-    /* ============================
+    /* =====================================================
         DELETE
-    ============================ */
+    ===================================================== */
     public function destroy(Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
-        // hanya yang masih dipinjam boleh dihapus
+        // Kembalikan stok
         $peminjaman->barang->increment('stok', $peminjaman->jumlah);
+
         $peminjaman->delete();
 
-        return back()->with('ok','Peminjaman dihapus & stok dikembalikan');
+        return back()->with('ok','Peminjaman dihapus dan stok dikembalikan');
     }
 
-    /* ============================
-        SECURITY
-    ============================ */
+    /* =====================================================
+        SECURITY FUNCTIONS
+    ===================================================== */
 
     private function onlyPetugas()
     {
