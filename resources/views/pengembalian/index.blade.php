@@ -4,167 +4,142 @@
 
 <div class="container-fluid">
 
-    <!-- Success Message -->
     @if(session('ok'))
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-check-circle me-2" style="font-size: 20px;"></i>
-            <div>
-                <strong>Berhasil!</strong> {{ session('ok') }}
-            </div>
+    <div class="pg-alert pg-alert-success alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-check-circle" style="font-size:20px;color:#059669;"></i>
+            <div><strong style="color:#065f46;">Berhasil!</strong> <span style="color:#047857;">{{ session('ok') }}</span></div>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
 
-    <!-- Error Message -->
     @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-exclamation-circle me-2" style="font-size: 20px;"></i>
-            <div>
-                <strong>Error!</strong> {{ session('error') }}
-            </div>
+    <div class="pg-alert pg-alert-danger alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-exclamation-circle" style="font-size:20px;color:#dc2626;"></i>
+            <div><strong style="color:#991b1b;">Error!</strong> <span style="color:#b91c1c;">{{ session('error') }}</span></div>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="card custom-card-pengembalian">
+            <div class="card pg-card">
                 <div class="card-body p-4">
 
-                   <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h4 class="card-title-pengembalian mb-1">Data Pengembalian</h4>
-                            <p class="card-subtitle-pengembalian">Kelola pengembalian barang inventaris</p>
+                            <h4 class="pg-title mb-1">Data Pengembalian</h4>
+                            <p class="pg-subtitle">Kelola pengembalian barang inventaris</p>
                         </div>
-
-                        <div class="header-actions-pengembalian">
-
-                            <!-- Search -->
-                            <div class="search-wrapper-pengembalian">
-                                <i class="fas fa-search search-icon-pengembalian"></i>
-                                <input type="text"
-                                    id="searchPengembalian"
-                                    class="search-input-pengembalian"
-                                    placeholder="Cari pengembalian...">
+                        <div class="pg-header-actions">
+                            <div class="pg-search-wrapper">
+                                <i class="fas fa-search pg-search-icon"></i>
+                                <input type="text" id="searchPg" class="pg-search-input" placeholder="Cari pengembalian...">
                             </div>
-
-                            <!-- Tombol Tambah - Only for Petugas -->
                             @if(auth()->user()->role == 'petugas')
-                            <a href="{{ route('petugas.pengembalian.create') }}" class="btn-add-pengembalian">
+                            <a href="{{ route('petugas.pengembalian.create') }}" class="pg-btn-add">
                                 <i class="fas fa-plus-circle"></i>
                                 <span>Tambah Pengembalian</span>
                             </a>
                             @endif
-
                         </div>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table custom-table-pengembalian">
+                        <table class="table pg-table">
                             <thead>
                                 <tr>
-                                    <th class="col-no-pengembalian">No</th>
-                                    <th class="col-barang-pengembalian">Barang</th>
-                                    <th class="col-peminjam-pengembalian">Peminjam</th>
-                                    <th class="text-center col-jumlah-pengembalian">Jumlah</th>
-                                    <th class="text-center col-tgl-pengembalian">Tgl Kembali</th>
-                                    <th class="text-center col-kondisi-pengembalian">Kondisi Kembali</th>
-                                    <th class="text-center col-aksi-pengembalian">Aksi</th>
+                                    <th class="pg-col-no">No</th>
+                                    <th class="pg-col-barang">Barang</th>
+                                    <th class="pg-col-peminjam">Peminjam</th>
+                                    <th class="text-center pg-col-jumlah">Jumlah</th>
+                                    <th class="text-center pg-col-tgl">Tgl Kembali</th>
+                                    <th class="text-center pg-col-telat">Keterlambatan</th>
+                                    <th class="text-center pg-col-kondisi">Kondisi</th>
+                                    <th class="text-center pg-col-aksi">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($pengembalian as $item)
+                                @forelse($pengembalian as $item)
                                 <tr>
-                                    <td class="col-number-pengembalian">{{ $loop->iteration }}</td>
-                                    <td class="col-barang-value">
-                                        <span class="badge-barang-pengembalian">
-                                            {{ $item->peminjaman->barang->nama_barang }}
-                                        </span>
+                                    <td class="pg-cell-no">{{ $loop->iteration }}</td>
+                                    <td>
+                                        <span class="pg-badge-item">{{ $item->peminjaman->barang->nama_barang }}</span>
                                     </td>
-                                    <td class="col-peminjam-value">{{ $item->peminjaman->nama_peminjam }}</td>
+                                    <td class="pg-cell-peminjam">{{ $item->peminjaman->nama_peminjam }}</td>
                                     <td class="text-center">
-                                        <span class="badge-jumlah-pengembalian">{{ $item->peminjaman->jumlah }}</span>
+                                        <span class="pg-badge-num">{{ $item->peminjaman->jumlah }}</span>
                                     </td>
-                                 <td class="text-center">
-                                        @php
-                                            $tglKembali = \Carbon\Carbon::parse($item->tgl_kembali);
-                                            $tglRencana = \Carbon\Carbon::parse($item->peminjaman->tgl_kembali_rencana);
-                                            $telat = $tglKembali->gt($tglRencana);
-                                            $selisih = $tglKembali->diffInDays($tglRencana);
-                                        @endphp
-
-                                        <div>
-                                            <span class="badge-tanggal-pengembalian">
-                                                {{ $tglKembali->format('d/m/Y') }}
-                                            </span>
-
-                                            @if($telat)
-                                                <div style="font-size:11px;color:#c62828;font-weight:600;">
-                                                    Telat {{ $selisih }} hari
-                                                </div>
-                                            @else
-                                                <div style="font-size:11px;color:#2e7d32;font-weight:600;">
-                                                    Tepat waktu
-                                                </div>
+                                    <td class="text-center">
+                                        <span class="pg-badge-date">{{ \Carbon\Carbon::parse($item->tgl_kembali_real)->format('d/m/Y') }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($item->hari_telat > 0)
+                                            <span class="pg-badge-late">{{ $item->hari_telat }} hari</span>
+                                        @else
+                                            <span class="pg-badge-ontime"><i class="fas fa-check-circle"></i> Tepat</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="pg-kondisi-pills">
+                                            @php
+                                                $baik = $item->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
+                                                $rusak = $item->details()->where('kondisi', 'rusak')->value('jumlah') ?? 0;
+                                                $perlu = $item->details()->where('kondisi', 'perlu_perbaikan')->value('jumlah') ?? 0;
+                                            @endphp
+                                            @if($baik > 0)
+                                                <span class="pg-pill pg-pill-ok">{{ $baik }} baik</span>
+                                            @endif
+                                            @if($rusak > 0)
+                                                <span class="pg-pill pg-pill-bad">{{ $rusak }} rusak</span>
+                                            @endif
+                                            @if($perlu > 0)
+                                                <span class="pg-pill pg-pill-warn">{{ $perlu }} perlu perbaikan</span>
                                             @endif
                                         </div>
                                     </td>
-
-                                    <td class="text-center">
-                                        @php
-                                            $badge = match($item->kondisi_saat_kembali) {
-                                                'baik'            => ['bg' => '#E8F8F0', 'text' => '#2E7D32', 'label' => 'Baik'],
-                                                'rusak'           => ['bg' => '#FDECEA', 'text' => '#C62828', 'label' => 'Rusak'],
-                                                'perlu_perbaikan' => ['bg' => '#FFF8E1', 'text' => '#F9A825', 'label' => 'Perlu Perbaikan'],
-                                                default           => ['bg' => '#ECEFF1', 'text' => '#546E7A', 'label' => ucfirst($item->kondisi_saat_kembali)],
-                                            };
-                                        @endphp
-                                        <span class="badge-kondisi-pengembalian" style="background: {{ $badge['bg'] }}; color: {{ $badge['text'] }};">
-                                            {{ $badge['label'] }}
-                                        </span>
-                                    </td>
-
                                     <td>
-                                        <div class="action-buttons-pengembalian">
-
-                                                                        {{-- Detail --}}
+                                        <div class="pg-action-btns">
+                                                                            {{-- Detail --}}
                                             @if(auth()->user()->role == 'admin')
-                                                <a href="{{ route('admin.pengembalian.show', $item->id) }}" class="btn-action btn-detail">
+                                                <a href="{{ route('admin.pengembalian.show', $item->id) }}" class="pg-btn-action pg-btn-detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             @else
-                                                <a href="{{ route('petugas.pengembalian.show', $item->id) }}" class="btn-action btn-detail">
+                                                <a href="{{ route('petugas.pengembalian.show', $item->id) }}" class="pg-btn-action pg-btn-detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             @endif
-
-                                            <!-- Edit & Delete - Only Petugas -->
                                             @if(auth()->user()->role == 'petugas')
                                             <a href="{{ route('petugas.pengembalian.edit', $item->id) }}"
-                                               class="btn-action btn-edit-pengembalian"
-                                               title="Edit">
+                                               class="pg-btn-action pg-btn-edit" title="Edit">
                                                 <i class="far fa-edit"></i>
                                             </a>
-
                                             <form action="{{ route('petugas.pengembalian.destroy', $item->id) }}"
-                                                  method="POST"
-                                                  class="d-inline-block"
-                                                  onsubmit="return confirm('Yakin ingin menghapus pengembalian ini? Stok akan disesuaikan kembali.')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-action btn-delete-pengembalian" title="Hapus">
+                                                  method="POST" class="d-inline-block"
+                                                  onsubmit="return confirm('Yakin hapus? Stok akan disesuaikan.')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="pg-btn-action pg-btn-delete" title="Hapus">
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
                                             </form>
                                             @endif
                                         </div>
-                                  </td>
+                                    </td>
                                 </tr>
-                                @endforeach
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="pg-empty">
+                                            <i class="fas fa-inbox"></i>
+                                            <p>Belum ada data pengembalian</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -176,437 +151,151 @@
 </div>
 
 <style>
-/* ===== TYPOGRAPHY PENGEMBALIAN ===== */
-:root {
-    --font-primary-pengembalian: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono-pengembalian: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+/* Card */
+.pg-card { border:none; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
+.pg-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+
+/* Header */
+.pg-title { font-size:24px; font-weight:700; letter-spacing:-0.5px; color:#1a1a1a; margin:0; }
+.pg-subtitle { font-size:13px; color:#6c757d; }
+.pg-header-actions { display:flex; gap:16px; align-items:center; }
+
+/* Search */
+.pg-search-wrapper { position:relative; width:340px; }
+.pg-search-icon { position:absolute; top:50%; left:16px; transform:translateY(-50%); color:#9ca3af; font-size:14px; pointer-events:none; }
+.pg-search-input {
+    width:100%; padding:11px 18px 11px 42px;
+    border:1.5px solid #e5e7eb; border-radius:12px;
+    background:#fafafa; font-size:14px; color:#374151;
+    transition:all 0.25s ease;
+}
+.pg-search-input::placeholder { color:#9ca3af; }
+.pg-search-input:hover { border-color:#cbd5e1; background:#fff; }
+.pg-search-input:focus { outline:none; border-color:#3b82f6; background:#fff; box-shadow:0 0 0 4px rgba(59,130,246,0.1); }
+
+/* Btn Add */
+.pg-btn-add {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:11px 24px; background:#17a2b8; color:#fff;
+    border-radius:12px; font-size:14px; font-weight:600;
+    text-decoration:none; box-shadow:0 2px 4px rgba(23,162,184,0.2);
+    transition:all 0.25s ease;
+}
+.pg-btn-add:hover { background:#138496; color:#fff; transform:translateY(-2px); box-shadow:0 6px 16px rgba(23,162,184,0.3); }
+
+/* Table */
+.pg-table { margin:0; border-collapse:separate; border-spacing:0; }
+.pg-table thead { background:linear-gradient(135deg,#667eea 0%, #764ba2 100%); }
+.pg-table thead tr th {
+    padding:18px 20px; color:#fff;
+    font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.8px; border:none; white-space:nowrap;
+}
+.pg-table thead tr th:first-child { border-radius:12px 0 0 0; }
+.pg-table thead tr th:last-child  { border-radius:0 12px 0 0; }
+
+/* Cols */
+.pg-col-no      { width:60px; text-align:center; }
+.pg-col-barang  { width:180px; }
+.pg-col-peminjam{ width:160px; }
+.pg-col-jumlah  { width:90px; }
+.pg-col-tgl     { width:120px; }
+.pg-col-telat   { width:140px; }
+.pg-col-kondisi { width:200px; }
+.pg-col-aksi    { width:160px; }
+
+.pg-table tbody tr { border-bottom:1px solid #f1f5f9; transition:all 0.2s ease; }
+.pg-table tbody tr:last-child { border-bottom:none; }
+.pg-table tbody tr:hover { background:linear-gradient(to right, #fafbfc, #f8fafc); transform:scale(1.002); }
+.pg-table tbody td { padding:16px 20px; vertical-align:middle; color:#374151; font-size:14px; }
+
+/* Cells */
+.pg-cell-no { font-weight:600; color:#9ca3af; font-size:13px; text-align:center; }
+.pg-cell-peminjam { font-weight:600; color:#1f2937; }
+
+/* Badges */
+.pg-badge-item {
+    display:inline-block; padding:6px 14px;
+    background:#f3f4f6; color:#4b5563; border:1px solid #e5e7eb;
+    border-radius:8px; font-size:12px; font-weight:600;
+}
+.pg-badge-num, .pg-badge-date {
+    display:inline-block; padding:6px 14px;
+    background:#eff6ff; color:#1e40af;
+    border-radius:8px; font-size:13px; font-weight:700;
+    font-family:"SF Mono",Monaco,Consolas,monospace;
+}
+.pg-badge-late {
+    display:inline-block; padding:6px 14px;
+    background:#FDECEA; color:#C62828;
+    border-radius:8px; font-size:12px; font-weight:700;
+}
+.pg-badge-ontime {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:6px 14px;
+    background:#E8F8F0; color:#2E7D32;
+    border-radius:20px; font-size:12px; font-weight:700;
 }
 
-body {
-    font-family: var(--font-primary-pengembalian);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+/* Kondisi Pills */
+.pg-kondisi-pills { display:flex; flex-direction:column; gap:4px; align-items:center; }
+.pg-pill {
+    display:inline-block; padding:4px 10px;
+    border-radius:6px; font-size:11px; font-weight:700; white-space:nowrap;
+}
+.pg-pill-ok   { background:#E8F8F0; color:#2E7D32; }
+.pg-pill-warn { background:#FFF8E1; color:#F9A825; }
+.pg-pill-bad  { background:#FDECEA; color:#C62828; }
+
+/* Actions */
+.pg-action-btns { display:flex; gap:8px; justify-content:center; }
+.pg-btn-action {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:38px; height:38px; border:none; border-radius:10px;
+    font-size:14px; cursor:pointer; text-decoration:none;
+    transition:all 0.25s ease; box-shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+.pg-btn-detail { background:#ffc107; color:#fff; }
+.pg-btn-detail:hover { background:#e0a800; color:#fff; transform:translateY(-3px) scale(1.05); box-shadow:0 6px 16px rgba(255,193,7,0.35); }
+.pg-btn-edit { background:#6c757d; color:#fff; }
+.pg-btn-edit:hover { background:#5a6268; color:#fff; transform:translateY(-3px) scale(1.05); box-shadow:0 6px 16px rgba(108,117,125,0.35); }
+.pg-btn-delete { background:#dc3545; color:#fff; }
+.pg-btn-delete:hover { background:#c82333; transform:translateY(-3px) scale(1.05); box-shadow:0 6px 16px rgba(220,53,69,0.35); }
+
+/* Empty */
+.pg-empty { color:#9ca3af; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.pg-empty i { font-size:48px; opacity:0.4; }
+.pg-empty p { font-size:15px; margin:0; }
+
+/* Alerts */
+.pg-alert {
+    padding:16px 20px; border-radius:12px; margin-bottom:24px;
+    display:flex; justify-content:space-between; align-items:center;
+    animation:pgSlideDown 0.4s ease;
+}
+.pg-alert-success { background:linear-gradient(135deg,#d1fae5,#a7f3d0); border-left:4px solid #10b981; }
+.pg-alert-danger  { background:linear-gradient(135deg,#fee2e2,#fecaca); border-left:4px solid #ef4444; }
+@keyframes pgSlideDown {
+    from { opacity:0; transform:translateY(-20px); }
+    to   { opacity:1; transform:translateY(0); }
 }
 
-/* ===== CARD PENGEMBALIAN ===== */
-.custom-card-pengembalian {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+@media (max-width:1200px) {
+    .pg-header-actions { flex-wrap:wrap; }
+    .pg-search-wrapper { width:280px; }
 }
-
-.custom-card-pengembalian:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-
-/* ===== HEADER PENGEMBALIAN ===== */
-.card-title-pengembalian {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: #1a1a1a;
-    margin: 0;
-}
-
-.card-subtitle-pengembalian {
-    font-size: 13px;
-    color: #6c757d;
-    margin: 4px 0 0 0;
-    font-weight: 400;
-}
-
-.header-actions-pengembalian {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-}
-
-/* ===== SEARCH PENGEMBALIAN ===== */
-.search-wrapper-pengembalian {
-    position: relative;
-    width: 340px;
-}
-
-.search-icon-pengembalian {
-    position: absolute;
-    top: 50%;
-    left: 16px;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    font-size: 14px;
-    pointer-events: none;
-    transition: color 0.2s ease;
-}
-
-.search-input-pengembalian {
-    width: 100%;
-    padding: 11px 18px 11px 42px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 12px;
-    background: #fafafa;
-    font-size: 14px;
-    font-weight: 400;
-    color: #374151;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.search-input-pengembalian::placeholder {
-    color: #9ca3af;
-}
-
-.search-input-pengembalian:hover {
-    border-color: #cbd5e1;
-    background: #fff;
-}
-
-.search-input-pengembalian:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.search-input-pengembalian:focus + .search-icon-pengembalian {
-    color: #3b82f6;
-}
-
-/* ===== BUTTON TAMBAH PENGEMBALIAN ===== */
-.btn-add-pengembalian {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 24px;
-    background: #17a2b8;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-add-pengembalian:hover {
-    background: #138496;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(23, 162, 184, 0.3);
-}
-
-.btn-add-pengembalian:active {
-    transform: translateY(0);
-}
-
-.btn-add-pengembalian i {
-    font-size: 15px;
-}
-
-/* ===== TABLE PENGEMBALIAN ===== */
-.custom-table-pengembalian {
-    margin: 0;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.custom-table-pengembalian thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.custom-table-pengembalian thead tr th {
-    padding: 18px 20px;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border: none;
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-.custom-table-pengembalian thead tr th:first-child {
-    border-radius: 12px 0 0 0;
-}
-
-.custom-table-pengembalian thead tr th:last-child {
-    border-radius: 0 12px 0 0;
-}
-
-/* Column widths pengembalian - Proportional */
-.col-no-pengembalian {
-    width: 70px;
-    text-align: center;
-}
-
-.col-barang-pengembalian {
-    width: 200px;
-    min-width: 180px;
-}
-
-.col-peminjam-pengembalian {
-    width: 180px;
-    min-width: 160px;
-}
-
-.col-jumlah-pengembalian {
-    width: 110px;
-}
-
-.col-tgl-pengembalian {
-    width: 140px;
-}
-
-.col-kondisi-pengembalian {
-    width: 160px;
-}
-
-.col-aksi-pengembalian {
-    width: 180px;
-}
-
-.custom-table-pengembalian tbody tr {
-    border-bottom: 1px solid #f1f5f9;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.custom-table-pengembalian tbody tr:last-child {
-    border-bottom: none;
-}
-
-.custom-table-pengembalian tbody tr:hover {
-    background: linear-gradient(to right, #fafbfc 0%, #f8fafc 100%);
-    transform: scale(1.002);
-}
-
-.custom-table-pengembalian tbody td {
-    padding: 18px 20px;
-    vertical-align: middle;
-    color: #374151;
-    font-size: 14px;
-}
-
-/* ===== TABLE CELLS PENGEMBALIAN ===== */
-.col-number-pengembalian {
-    font-weight: 600;
-    color: #9ca3af;
-    font-size: 13px;
-    text-align: center;
-}
-
-.col-barang-value {
-    font-weight: 500;
-    color: #1f2937;
-    font-size: 14px;
-}
-
-.col-peminjam-value {
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 14px;
-}
-
-/* ===== BADGES PENGEMBALIAN ===== */
-.badge-barang-pengembalian {
-    display: inline-block;
-    padding: 7px 16px;
-    background: #f3f4f6;
-    color: #4b5563;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-}
-
-.badge-jumlah-pengembalian,
-.badge-tanggal-pengembalian {
-    display: inline-block;
-    padding: 7px 16px;
-    background: #eff6ff;
-    color: #1e40af;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: var(--font-mono-pengembalian);
-    letter-spacing: 0.3px;
-}
-
-.badge-kondisi-pengembalian {
-    display: inline-block;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-}
-
-/* ===== ACTION BUTTONS PENGEMBALIAN ===== */
-.action-buttons-pengembalian {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-}
-
-
-.btn-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.btn-detail {
-    background: #ffc107;
-    color: #fff;
-}
-
-.btn-detail:hover {
-    background: #e0a800;
-    color: #fff;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(255, 193, 7, 0.35);
-}
-
-.btn-edit-pengembalian {
-    background: #6c757d;
-    color: #fff;
-}
-
-.btn-edit-pengembalian:hover {
-    background: #5a6268;
-    color: #fff;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.35);
-}
-
-.btn-delete-pengembalian {
-    background: #dc3545;
-    color: #fff;
-}
-
-.btn-delete-pengembalian:hover {
-    background: #c82333;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.35);
-}
-
-.btn-action-pengembalian:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* ===== ALERT ===== */
-.alert-success {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border: none;
-    border-left: 4px solid #10b981;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.alert-success i {
-    color: #059669;
-}
-
-.alert-success strong {
-    color: #065f46;
-}
-
-.alert-success div {
-    color: #047857;
-}
-
-.alert-danger {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border: none;
-    border-left: 4px solid #ef4444;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.alert-danger i {
-    color: #dc2626;
-}
-
-.alert-danger strong {
-    color: #991b1b;
-}
-
-.alert-danger div {
-    color: #b91c1c;
-}
-
-.btn-close {
-    opacity: 0.6;
-}
-
-.btn-close:hover {
-    opacity: 1;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ===== RESPONSIVE PENGEMBALIAN ===== */
-@media (max-width: 1200px) {
-    .header-actions-pengembalian {
-        flex-wrap: wrap;
-    }
-
-    .search-wrapper-pengembalian {
-        width: 280px;
-    }
-}
-
-@media (max-width: 768px) {
-    .card-title-pengembalian {
-        font-size: 20px;
-    }
-
-    .header-actions-pengembalian {
-        width: 100%;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .search-wrapper-pengembalian {
-        width: 100%;
-    }
-
-    .btn-add-pengembalian {
-        width: 100%;
-        justify-content: center;
-    }
+@media (max-width:768px) {
+    .pg-title { font-size:20px; }
+    .pg-header-actions { width:100%; flex-direction:column; gap:12px; }
+    .pg-search-wrapper { width:100%; }
+    .pg-btn-add { width:100%; justify-content:center; }
 }
 </style>
 
 <script>
-document.getElementById('searchPengembalian').addEventListener('keyup', function(e) {
+document.getElementById('searchPg').addEventListener('keyup', function(e) {
     const keyword = e.target.value.toLowerCase();
-    document.querySelectorAll('.custom-table-pengembalian tbody tr').forEach(row => {
+    document.querySelectorAll('.pg-table tbody tr').forEach(row => {
         row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
     });
 });

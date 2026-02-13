@@ -18,4 +18,9 @@ class Pengembalian extends Model
     {
         return $this->belongsTo(Peminjaman::class);
     }
+    public function details()
+{
+    return $this->hasMany(PengembalianDetail::class);
+}
+
 }
