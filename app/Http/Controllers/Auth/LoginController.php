@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     use AuthenticatesUsers;
+
+    // ⛔ HAPUS /home, ganti ke dashboard default
+    protected $redirectTo = '/admin/dashboard';
 
     public function __construct()
     {
@@ -16,17 +18,12 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    /**
-     * Redirect user after login based on role and bidang
-     */
     protected function authenticated($request, $user)
     {
-        // Admin redirect
         if ($user->role === 'admin') {
             return redirect('/admin/dashboard');
         }
 
-        // Petugas redirect
         if ($user->role === 'petugas') {
             $map = [
                 'Akademik' => 'akademik',
@@ -35,13 +32,12 @@ class LoginController extends Controller
                 'Umum' => 'umum',
             ];
 
-            // aman kalau bidang NULL
-            $bidangName = $user->bidang->nama_bidang ?? null;
+            $bidangName = optional($user->bidang)->nama_bidang;
 
-            return redirect('/petugas/' . ($bidangName && isset($map[$bidangName]) ? $map[$bidangName] : 'umum'));
+            return redirect('/petugas/' . ($map[$bidangName] ?? 'umum'));
         }
 
-        // default redirect
-        return redirect('/home');
+        // ⛔ JANGAN KE /home LAGI
+        return redirect('/admin/dashboard');
     }
 }

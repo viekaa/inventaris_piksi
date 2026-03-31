@@ -40,6 +40,15 @@
                                     class="search-input"
                                     placeholder="Cari peminjaman...">
                             </div>
+                            {{-- export pdf --}}
+                            <a href="{{ auth()->user()->role == 'admin'
+                                    ? route('admin.peminjaman.export-pdf', request()->query())
+                                    : route('petugas.peminjaman.export-pdf', request()->query()) }}"
+                            class="btn-export-pdf"
+                            target="_blank">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Export PDF</span>
+                            </a>
 
                             <!-- Tombol Tambah -->
                         @if(auth()->user()->role == 'petugas')
@@ -189,6 +198,31 @@
 </div>
 
 <style>
+    .btn-export-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-export-pdf:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    text-decoration: none;
+}
+
+.btn-export-pdf i { font-size: 15px; };
 /* ===== TYPOGRAPHY ===== */
 :root {
     --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

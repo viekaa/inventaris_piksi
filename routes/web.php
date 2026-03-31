@@ -8,7 +8,8 @@ use App\Http\Controllers\{
     PeminjamanController,
     PengembalianController,
     KategoriController,
-    LokasiController
+    LokasiController,
+    PetugasController
 };
 
 /*
@@ -27,58 +28,67 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 | ADMIN AREA
 |--------------------------------------------------------------------------
-| Admin hanya boleh LIHAT (index + show)
 */
 Route::middleware(['auth', 'role:admin'])
-->prefix('admin')
-->name('admin.')
-->group(function () {
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-    Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        // Dashboard
+        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
 
-    Route::resource('bidang', BidangController::class);
-    Route::resource('kategori', KategoriController::class);
-    Route::resource('lokasi', LokasiController::class);
+        /*
+        |----------------------------------------------------------------------
+        | MANAJEMEN
+        |----------------------------------------------------------------------
+        */
+        Route::resource('bidang',   BidangController::class);
+        Route::resource('kategori', KategoriController::class);
+        Route::resource('lokasi',   LokasiController::class);
+        Route::resource('petugas',  PetugasController::class);
 
-    // ===============================
-    // ADMIN BISA LIHAT DATA OPERASIONAL
-    // ===============================
-    Route::get('/peminjaman', [PeminjamanController::class, 'index'])
-        ->name('peminjaman.index');
+        /*
+        |----------------------------------------------------------------------
+        | OPERASIONAL (admin hanya lihat)
+        |----------------------------------------------------------------------
+        */
+        Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+            Route::get('/export-pdf',    [PeminjamanController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/',              [PeminjamanController::class, 'index'])->name('index');
+            Route::get('/{peminjaman}',  [PeminjamanController::class, 'show'])->name('show');
+        });
 
-    Route::get('/peminjaman/{peminjaman}', [PeminjamanController::class, 'show'])
-        ->name('peminjaman.show');
-
-    Route::get('/pengembalian', [PengembalianController::class, 'index'])
-        ->name('pengembalian.index');
-
-    Route::get('/pengembalian/{pengembalian}', [PengembalianController::class, 'show'])
-        ->name('pengembalian.show');
-});
-
+        Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
+            Route::get('/export-pdf',      [PengembalianController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/',                [PengembalianController::class, 'index'])->name('index');
+            Route::get('/{pengembalian}',  [PengembalianController::class, 'show'])->name('show');
+        });
+    });
 
 
 /*
 |--------------------------------------------------------------------------
 | PETUGAS AREA
 |--------------------------------------------------------------------------
-| Petugas = FULL CRUD
 */
-Route::middleware(['auth','role:petugas'])
-->prefix('petugas')
-->name('petugas.')
-->group(function () {
+Route::middleware(['auth', 'role:petugas'])
+    ->prefix('petugas')
+    ->name('petugas.')
+    ->group(function () {
 
-    // Dashboard bidang
-    Route::get('/akademik', fn () => view('petugas.akademik'))->name('akademik');
-    Route::get('/keuangan', fn () => view('petugas.keuangan'))->name('keuangan');
-    Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');
-    Route::get('/umum', fn () => view('petugas.umum'))->name('umum');
+        // Dashboard per-bidang
+        Route::get('/akademik',      fn () => view('petugas.akademik'))->name('akademik');
+        Route::get('/keuangan',      fn () => view('petugas.keuangan'))->name('keuangan');
+        Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');
+        Route::get('/umum',          fn () => view('petugas.umum'))->name('umum');
 
-    // OPERASIONAL FULL
-    Route::resource('peminjaman', PeminjamanController::class);
-    Route::resource('pengembalian', PengembalianController::class);
-});
+        // Operasional (full CRUD) + export PDF
+        Route::get('/peminjaman/export-pdf',   [PeminjamanController::class,   'exportPdf'])->name('peminjaman.export-pdf');
+        Route::get('/pengembalian/export-pdf', [PengembalianController::class, 'exportPdf'])->name('pengembalian.export-pdf');
+
+        Route::resource('peminjaman',   PeminjamanController::class);
+        Route::resource('pengembalian', PengembalianController::class);
+    });
 
 
 /*
@@ -86,10 +96,11 @@ Route::middleware(['auth','role:petugas'])
 | BARANG (ADMIN + PETUGAS)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:admin,petugas'])
-->group(function () {
-    Route::resource('barang', BarangController::class);
-});
+Route::middleware(['auth', 'role:admin,petugas'])
+    ->group(function () {
+        Route::get('/barang/export-pdf', [BarangController::class, 'exportPdf'])->name('barang.export-pdf');
+        Route::resource('barang', BarangController::class);
+    });
 
 
 /*

@@ -39,6 +39,15 @@
                                 <i class="fas fa-search pg-search-icon"></i>
                                 <input type="text" id="searchPg" class="pg-search-input" placeholder="Cari pengembalian...">
                             </div>
+                            {{-- export pdf --}}
+                            <a href="{{ auth()->user()->role == 'admin'
+                                    ? route('admin.pengembalian.export-pdf', request()->query())
+                                    : route('petugas.pengembalian.export-pdf', request()->query()) }}"
+                            class="btn-export-pdf"
+                            target="_blank">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Export PDF</span>
+                            </a>
                             @if(auth()->user()->role == 'petugas')
                             <a href="{{ route('petugas.pengembalian.create') }}" class="pg-btn-add">
                                 <i class="fas fa-plus-circle"></i>
@@ -151,6 +160,31 @@
 </div>
 
 <style>
+    .btn-export-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-export-pdf:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    text-decoration: none;
+}
+
+.btn-export-pdf i { font-size: 15px; };
 /* Card */
 .pg-card { border:none; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
 .pg-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.08); }

@@ -38,6 +38,13 @@
                                     class="search-input"
                                     placeholder="Cari barang...">
                             </div>
+                            {{-- export pdf --}}
+                            <a href="{{ route('barang.export-pdf', request()->query()) }}"
+                            class="btn-export-pdf"
+                            target="_blank">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Export PDF</span>
+                            </a>
 
                             <!-- Tombol Tambah -->
                             <a href="{{ route('barang.create') }}" class="btn-add">
@@ -55,6 +62,7 @@
                                     <th class="col-no">No</th>
                                     <th>Nama Barang</th>
                                     <th>Kategori</th>
+                                    <th>Bidang</th>
                                     <th>Lokasi</th>
                                     <th class="text-center col-stok">Stok</th>
                                     <th class="text-center col-total">Jumlah Total</th>
@@ -70,6 +78,11 @@
                                     <td>
                                         <span class="badge-kategori">
                                             {{ $item->kategori->nama_kategori }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-bidang">
+                                            {{ $item->bidang->nama_bidang ?? '-' }}
                                         </span>
                                     </td>
                                     <td class="col-lokasi">
@@ -139,6 +152,42 @@
 </div>
 
 <style>
+    .badge-bidang {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+    .btn-export-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-export-pdf:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    text-decoration: none;
+}
+
+.btn-export-pdf i { font-size: 15px; };
 /* ===== TYPOGRAPHY ===== */
 :root {
     --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

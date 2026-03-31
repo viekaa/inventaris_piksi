@@ -54,9 +54,9 @@
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <label class="text-dark" for="email">Username</label>
+                                        <label class="text-dark" for="email">Email</label>
                                         <input class="form-control" name="email" type="text"
-                                            placeholder="enter your username">
+                                            placeholder="enter your email">
                                     </div>
                                 </div>
                                 <div class="col-lg-12">

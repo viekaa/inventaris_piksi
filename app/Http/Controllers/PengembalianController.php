@@ -12,29 +12,55 @@ class PengembalianController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $user   = Auth::user();
+        $search = request('search');
+
         $query = Pengembalian::with(['peminjaman.barang', 'peminjaman.jurusan', 'details']);
 
         if ($user->role == 'petugas') {
-            $query->whereHas('peminjaman.barang', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
+            $query->whereHas('peminjaman.barang', fn ($q) => $q->where('bidang_id', $user->bidang_id));
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('peminjaman', fn ($p) => $p->where('nama_peminjam', 'like', "%{$search}%"))
+                  ->orWhereHas('peminjaman.barang', fn ($b) => $b->where('nama_barang', 'like', "%{$search}%"));
             });
         }
 
         return view('pengembalian.index', ['pengembalian' => $query->latest()->get()]);
     }
 
+    public function exportPdf()
+    {
+        $user   = Auth::user();
+        $search = request('search');
+
+        $query = Pengembalian::with(['peminjaman.barang', 'peminjaman.jurusan', 'details']);
+
+        if ($user->role == 'petugas') {
+            $query->whereHas('peminjaman.barang', fn ($q) => $q->where('bidang_id', $user->bidang_id));
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('peminjaman', fn ($p) => $p->where('nama_peminjam', 'like', "%{$search}%"))
+                  ->orWhereHas('peminjaman.barang', fn ($b) => $b->where('nama_barang', 'like', "%{$search}%"));
+            });
+        }
+
+        return view('pdf.pengembalian', ['pengembalian' => $query->latest()->get()]);
+    }
+
     public function create()
     {
         if (Auth::user()->role == 'admin') abort(403, 'Admin hanya boleh melihat data');
 
-        $user = Auth::user();
+        $user  = Auth::user();
         $query = Peminjaman::where('status', 'dipinjam')->with('barang', 'jurusan');
 
         if ($user->role == 'petugas') {
-            $query->whereHas('barang', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
-            });
+            $query->whereHas('barang', fn ($q) => $q->where('bidang_id', $user->bidang_id));
         }
 
         return view('pengembalian.create', ['peminjaman' => $query->get()]);
@@ -45,12 +71,12 @@ class PengembalianController extends Controller
         if (Auth::user()->role == 'admin') abort(403);
 
         $r->validate([
-            'peminjaman_id' => 'required|exists:peminjamans,id',
+            'peminjaman_id'    => 'required|exists:peminjamans,id',
             'tgl_kembali_real' => 'required|date',
-            'kondisi.baik' => 'required|integer|min:0',
-            'kondisi.rusak' => 'required|integer|min:0',
+            'kondisi.baik'     => 'required|integer|min:0',
+            'kondisi.rusak'    => 'required|integer|min:0',
             'kondisi.perlu_perbaikan' => 'required|integer|min:0',
-            'catatan' => 'nullable|string'
+            'catatan'          => 'nullable|string'
         ]);
 
         $peminjaman = Peminjaman::with('barang')->findOrFail($r->peminjaman_id);
@@ -63,14 +89,15 @@ class PengembalianController extends Controller
 
         $hariTelat = 0;
         if ($r->tgl_kembali_real > $peminjaman->tgl_kembali_rencana) {
-            $hariTelat = Carbon::parse($peminjaman->tgl_kembali_rencana)->diffInDays(Carbon::parse($r->tgl_kembali_real));
+            $hariTelat = Carbon::parse($peminjaman->tgl_kembali_rencana)
+                                ->diffInDays(Carbon::parse($r->tgl_kembali_real));
         }
 
         $pengembalian = Pengembalian::create([
-            'peminjaman_id' => $peminjaman->id,
+            'peminjaman_id'    => $peminjaman->id,
             'tgl_kembali_real' => $r->tgl_kembali_real,
-            'hari_telat' => $hariTelat,
-            'catatan' => $r->catatan
+            'hari_telat'       => $hariTelat,
+            'catatan'          => $r->catatan
         ]);
 
         foreach ($r->kondisi as $kondisi => $jumlah) {
@@ -106,26 +133,34 @@ class PengembalianController extends Controller
         $this->authorizePengembalian($pengembalian);
 
         $r->validate([
-            'tgl_kembali_real' => 'required|date',
-            'kondisi.baik' => 'required|integer|min:0',
-            'kondisi.rusak' => 'required|integer|min:0',
+            'tgl_kembali_real'        => 'required|date',
+            'kondisi.baik'            => 'required|integer|min:0',
+            'kondisi.rusak'           => 'required|integer|min:0',
             'kondisi.perlu_perbaikan' => 'required|integer|min:0',
-            'catatan' => 'nullable|string'
+            'catatan'                 => 'nullable|string'
         ]);
 
         $pengembalian->load('peminjaman');
         $total = $r->kondisi['baik'] + $r->kondisi['rusak'] + $r->kondisi['perlu_perbaikan'];
-        if ($total != $pengembalian->peminjaman->jumlah) return back()->withErrors(['kondisi' => 'Total harus ' . $pengembalian->peminjaman->jumlah]);
+        if ($total != $pengembalian->peminjaman->jumlah) {
+            return back()->withErrors(['kondisi' => 'Total harus ' . $pengembalian->peminjaman->jumlah]);
+        }
 
         $hariTelat = 0;
         if ($r->tgl_kembali_real > $pengembalian->peminjaman->tgl_kembali_rencana) {
-            $hariTelat = Carbon::parse($pengembalian->peminjaman->tgl_kembali_rencana)->diffInDays(Carbon::parse($r->tgl_kembali_real));
+            $hariTelat = Carbon::parse($pengembalian->peminjaman->tgl_kembali_rencana)
+                                ->diffInDays(Carbon::parse($r->tgl_kembali_real));
         }
 
         $baikLama = $pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
         $baikBaru = $r->kondisi['baik'];
 
-        $pengembalian->update(['tgl_kembali_real' => $r->tgl_kembali_real, 'hari_telat' => $hariTelat, 'catatan' => $r->catatan]);
+        $pengembalian->update([
+            'tgl_kembali_real' => $r->tgl_kembali_real,
+            'hari_telat'       => $hariTelat,
+            'catatan'          => $r->catatan
+        ]);
+
         $pengembalian->details()->delete();
 
         foreach ($r->kondisi as $kondisi => $jumlah) {
@@ -145,14 +180,14 @@ class PengembalianController extends Controller
         $this->authorizePengembalian($pengembalian);
 
         $barang = $pengembalian->peminjaman->barang;
-        $baik = $pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
+        $baik   = $pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
 
         $barang->decrement('stok', $baik);
         $pengembalian->peminjaman->update(['status' => 'dipinjam']);
         $pengembalian->details()->delete();
         $pengembalian->delete();
 
-        return redirect()->route('pengembalian.index')->with('ok', 'Pengembalian dihapus');
+        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian dihapus');
     }
 
     private function authorizePengembalian($pengembalian)

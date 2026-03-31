@@ -45,6 +45,12 @@
                             <span class="hide-menu">Lokasi</span>
                         </a>
                     </li>
+                    <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('admin.petugas.index') }}">
+                        <i data-feather="users" class="feather-icon"></i>
+                        <span class="hide-menu">Pengguna</span>
+                    </a>
+                </li>
                 @endif
 
                 {{-- ADMIN + PETUGAS --}}

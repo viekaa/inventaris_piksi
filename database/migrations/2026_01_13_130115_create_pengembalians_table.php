@@ -16,7 +16,7 @@ return new class extends Migration {
 
             $table->date('tgl_kembali_real'); // tanggal kembali sebenarnya
             $table->integer('hari_telat')->default(0);
-            $table->enum('kondisi_saat_kembali', ['baik','rusak','perlu_perbaikan']);
+            // $table->enum('kondisi_saat_kembali', ['baik','rusak','perlu_perbaikan']);
             $table->text('catatan')->nullable();
 
             $table->timestamps();

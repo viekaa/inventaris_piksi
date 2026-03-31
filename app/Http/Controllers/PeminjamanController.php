@@ -11,190 +11,173 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
-    /* =====================================================
-        INDEX
-    ===================================================== */
     public function index()
     {
-        $user = Auth::user();
+        $user   = Auth::user();
+        $search = request('search');
 
-        $query = Peminjaman::with(['barang','jurusan.fakultas']);
+        $query = Peminjaman::with(['barang', 'jurusan.fakultas']);
 
-        // Petugas hanya melihat barang dari bidangnya
         if ($user->role === 'petugas') {
-            $query->whereHas('barang', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
+            $query->whereHas('barang', fn ($q) => $q->where('bidang_id', $user->bidang_id));
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhereHas('barang', fn ($b) => $b->where('nama_barang', 'like', "%{$search}%"))
+                  ->orWhereHas('barang.bidang', fn ($b) => $b->where('nama_bidang', 'like', "%{$search}%"));
             });
         }
 
-        return view('peminjaman.index', [
-            'peminjaman' => $query->latest()->get()
-        ]);
+        return view('peminjaman.index', ['peminjaman' => $query->latest()->get()]);
     }
 
-    /* =====================================================
-        CREATE
-    ===================================================== */
+    public function exportPdf()
+    {
+        $user   = Auth::user();
+        $search = request('search');
+
+        $query = Peminjaman::with(['barang.bidang', 'jurusan']);
+
+        if ($user->role === 'petugas') {
+            $query->whereHas('barang', fn ($q) => $q->where('bidang_id', $user->bidang_id));
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhereHas('barang', fn ($b) => $b->where('nama_barang', 'like', "%{$search}%"))
+                  ->orWhereHas('barang.bidang', fn ($b) => $b->where('nama_bidang', 'like', "%{$search}%"));
+            });
+        }
+
+        return view('pdf.peminjaman', ['peminjaman' => $query->latest()->get()]);
+    }
+
     public function create()
     {
         $this->onlyPetugas();
 
         $user = Auth::user();
 
-        // Barang hanya dari bidang petugas
-        $barang = Barang::where('bidang_id', $user->bidang_id)->get();
-
+        $barang   = Barang::where('bidang_id', $user->bidang_id)->get();
         $jurusans = Jurusan::with('fakultas')
-            ->orderBy('nama_jurusan')
-            ->get()
-            ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
+                        ->orderBy('nama_jurusan')
+                        ->get()
+                        ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
 
-        return view('peminjaman.create', compact('barang','jurusans'));
+        return view('peminjaman.create', compact('barang', 'jurusans'));
     }
 
-    /* =====================================================
-        STORE
-    ===================================================== */
     public function store(Request $r)
     {
         $this->onlyPetugas();
 
         $r->validate([
-            'barang_id' => 'required|exists:barangs,id',
-            'nama_peminjam' => 'required',
-            'npm' => 'required',
-            'jurusan_id' => 'required|exists:jurusans,id',
-            'angkatan' => 'required|digits:4',
-            'jumlah' => 'required|integer|min:1',
-            'tgl_pinjam' => 'required|date',
+            'barang_id'           => 'required|exists:barangs,id',
+            'nama_peminjam'       => 'required',
+            'npm'                 => 'required',
+            'jurusan_id'          => 'required|exists:jurusans,id',
+            'angkatan'            => 'required|digits:4',
+            'jumlah'              => 'required|integer|min:1',
+            'tgl_pinjam'          => 'required|date',
             'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam',
             'kondisi_saat_pinjam' => 'required'
         ]);
 
         $barang = Barang::findOrFail($r->barang_id);
 
-        // Cegah petugas pinjam barang dari bidang lain
         if ($barang->bidang_id != Auth::user()->bidang_id) {
-            abort(403,'Barang bukan bidang kamu');
+            abort(403, 'Barang bukan bidang kamu');
         }
 
-        // Cek stok
         if ($barang->stok < $r->jumlah) {
-            return back()->with('error','Stok tidak mencukupi');
+            return back()->with('error', 'Stok tidak mencukupi');
         }
 
         Peminjaman::create([
-            'barang_id' => $r->barang_id,
-            'nama_peminjam' => $r->nama_peminjam,
-            'npm' => $r->npm,
-            'jurusan_id' => $r->jurusan_id,
-            'angkatan' => $r->angkatan,
-            'jumlah' => $r->jumlah,
-            'tgl_pinjam' => $r->tgl_pinjam,
+            'barang_id'           => $r->barang_id,
+            'nama_peminjam'       => $r->nama_peminjam,
+            'npm'                 => $r->npm,
+            'jurusan_id'          => $r->jurusan_id,
+            'angkatan'            => $r->angkatan,
+            'jumlah'              => $r->jumlah,
+            'tgl_pinjam'          => $r->tgl_pinjam,
             'tgl_kembali_rencana' => $r->tgl_kembali_rencana,
             'kondisi_saat_pinjam' => $r->kondisi_saat_pinjam,
-            'status' => 'dipinjam'
+            'status'              => 'dipinjam'
         ]);
 
-        // Kurangi stok
         $barang->decrement('stok', $r->jumlah);
 
-        return redirect()->route('petugas.peminjaman.index')
-            ->with('ok','Peminjaman berhasil disimpan');
+        return redirect()->route('petugas.peminjaman.index')->with('ok', 'Peminjaman berhasil disimpan');
     }
 
-    /* =====================================================
-        SHOW
-    ===================================================== */
     public function show(Peminjaman $peminjaman)
     {
         $this->authorizeBidang($peminjaman);
-
         return view('peminjaman.show', compact('peminjaman'));
     }
 
-    /* =====================================================
-        EDIT
-    ===================================================== */
     public function edit(Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
         $jurusans = Jurusan::with('fakultas')
-            ->orderBy('nama_jurusan')
-            ->get()
-            ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
+                        ->orderBy('nama_jurusan')
+                        ->get()
+                        ->groupBy(fn ($j) => $j->fakultas->nama_fakultas);
 
-        return view('peminjaman.edit', compact('peminjaman','jurusans'));
+        return view('peminjaman.edit', compact('peminjaman', 'jurusans'));
     }
 
-    /* =====================================================
-        UPDATE
-    ===================================================== */
     public function update(Request $r, Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
         $r->validate([
-            'nama_peminjam' => 'required',
-            'npm' => 'required',
-            'jurusan_id' => 'required|exists:jurusans,id',
-            'angkatan' => 'required|digits:4',
-            'tgl_pinjam' => 'required|date',
+            'nama_peminjam'       => 'required',
+            'npm'                 => 'required',
+            'jurusan_id'          => 'required|exists:jurusans,id',
+            'angkatan'            => 'required|digits:4',
+            'tgl_pinjam'          => 'required|date',
             'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam',
             'kondisi_saat_pinjam' => 'required'
         ]);
 
         $peminjaman->update($r->only([
-            'nama_peminjam',
-            'npm',
-            'jurusan_id',
-            'angkatan',
-            'tgl_pinjam',
-            'tgl_kembali_rencana',
-            'kondisi_saat_pinjam'
+            'nama_peminjam', 'npm', 'jurusan_id', 'angkatan',
+            'tgl_pinjam', 'tgl_kembali_rencana', 'kondisi_saat_pinjam'
         ]));
 
-        return redirect()->route('petugas.peminjaman.index')
-            ->with('ok','Peminjaman berhasil diupdate');
+        return redirect()->route('petugas.peminjaman.index')->with('ok', 'Peminjaman berhasil diupdate');
     }
 
-    /* =====================================================
-        DELETE
-    ===================================================== */
     public function destroy(Peminjaman $peminjaman)
     {
         $this->onlyPetugas();
         $this->authorizePeminjaman($peminjaman);
 
-        // Kembalikan stok
         $peminjaman->barang->increment('stok', $peminjaman->jumlah);
-
         $peminjaman->delete();
 
-        return back()->with('ok','Peminjaman dihapus dan stok dikembalikan');
+        return back()->with('ok', 'Peminjaman dihapus dan stok dikembalikan');
     }
-
-    /* =====================================================
-        SECURITY FUNCTIONS
-    ===================================================== */
 
     private function onlyPetugas()
     {
         if (Auth::user()->role !== 'petugas') {
-            abort(403,'Admin hanya boleh melihat data');
+            abort(403, 'Admin hanya boleh melihat data');
         }
     }
 
     private function authorizeBidang($peminjaman)
     {
-        if (
-            Auth::user()->role === 'petugas' &&
-            $peminjaman->barang->bidang_id != Auth::user()->bidang_id
-        ) {
-            abort(403,'Akses peminjaman bukan bidang kamu');
+        if (Auth::user()->role === 'petugas' && $peminjaman->barang->bidang_id != Auth::user()->bidang_id) {
+            abort(403, 'Akses peminjaman bukan bidang kamu');
         }
     }
 
@@ -203,7 +186,7 @@ class PeminjamanController extends Controller
         $this->authorizeBidang($peminjaman);
 
         if ($peminjaman->status === 'dikembalikan') {
-            abort(403,'Barang sudah dikembalikan, data dikunci');
+            abort(403, 'Barang sudah dikembalikan, data dikunci');
         }
     }
 }

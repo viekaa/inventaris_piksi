@@ -10,7 +10,7 @@ class Pengembalian extends Model
         'peminjaman_id',
         'tgl_kembali_real',
         'hari_telat',
-        'kondisi_saat_kembali',
+        // 'kondisi_saat_kembali',
         'catatan'
     ];
 

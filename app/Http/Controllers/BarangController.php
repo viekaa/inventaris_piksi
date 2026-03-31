@@ -13,15 +13,48 @@ class BarangController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $user   = Auth::user();
+        $search = request('search');
 
-        $barang = $user->role == 'admin'
-            ? Barang::with(['kategori','lokasi','bidang'])->get()
-            : Barang::with(['kategori','lokasi','bidang'])
-                ->where('bidang_id', $user->bidang_id)
-                ->get();
+        $query = Barang::with(['kategori', 'lokasi', 'bidang']);
 
-        return view('barang.index', compact('barang'));
+        if ($user->role == 'petugas') {
+            $query->where('bidang_id', $user->bidang_id);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                  ->orWhereHas('kategori', fn ($k) => $k->where('nama_kategori', 'like', "%{$search}%"))
+                  ->orWhereHas('lokasi',   fn ($l) => $l->where('nama_lokasi',   'like', "%{$search}%"))
+                  ->orWhereHas('bidang',   fn ($b) => $b->where('nama_bidang',   'like', "%{$search}%"));
+            });
+        }
+
+        return view('barang.index', ['barang' => $query->get()]);
+    }
+
+    public function exportPdf()
+    {
+        $user   = Auth::user();
+        $search = request('search');
+
+        $query = Barang::with(['kategori', 'lokasi', 'bidang']);
+
+        if ($user->role == 'petugas') {
+            $query->where('bidang_id', $user->bidang_id);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                  ->orWhereHas('kategori', fn ($k) => $k->where('nama_kategori', 'like', "%{$search}%"))
+                  ->orWhereHas('lokasi',   fn ($l) => $l->where('nama_lokasi',   'like', "%{$search}%"))
+                  ->orWhereHas('bidang',   fn ($b) => $b->where('nama_bidang',   'like', "%{$search}%"));
+            });
+        }
+
+        return view('pdf.barang', ['barang' => $query->get()]);
     }
 
     public function create()
@@ -41,38 +74,32 @@ class BarangController extends Controller
     {
         $user = Auth::user();
 
-        // Validation rules
         $rules = [
-            'nama_barang'   => 'required|string|max:255',
-            'kategori_id'   => 'required|exists:kategoris,id',
-            'lokasi_id'     => 'required|exists:lokasis,id',
-            'jumlah_total'  => 'required|integer|min:0',
-            'stok'          => 'required|integer|min:0',
-            'kondisi'       => 'required|in:baik,rusak,perlu_perbaikan'
+            'nama_barang'  => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,id',
+            'lokasi_id'    => 'required|exists:lokasis,id',
+            'jumlah_total' => 'required|integer|min:0',
+            'stok'         => 'required|integer|min:0',
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan'
         ];
 
-        // Only admin can choose bidang
         if ($user->role == 'admin') {
             $rules['bidang_id'] = 'required|exists:bidangs,id';
         }
 
         $validated = $r->validate($rules);
 
-        // Create barang
         Barang::create([
-            'nama_barang'   => $validated['nama_barang'],
-            'kategori_id'   => $validated['kategori_id'],
-            'lokasi_id'     => $validated['lokasi_id'],
-            'bidang_id'     => $user->role == 'admin'
-                                ? $validated['bidang_id']
-                                : $user->bidang_id,
-            'jumlah_total'  => $validated['jumlah_total'],
-            'stok'          => $validated['stok'],
-            'kondisi'       => $validated['kondisi']
+            'nama_barang'  => $validated['nama_barang'],
+            'kategori_id'  => $validated['kategori_id'],
+            'lokasi_id'    => $validated['lokasi_id'],
+            'bidang_id'    => $user->role == 'admin' ? $validated['bidang_id'] : $user->bidang_id,
+            'jumlah_total' => $validated['jumlah_total'],
+            'stok'         => $validated['stok'],
+            'kondisi'      => $validated['kondisi']
         ]);
 
-        return redirect()->route('barang.index')
-                         ->with('success','Barang berhasil ditambahkan!');
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
     }
 
     public function show(Barang $barang)
@@ -103,63 +130,52 @@ class BarangController extends Controller
 
         $user = Auth::user();
 
-        // Validation rules
         $rules = [
-            'nama_barang'   => 'required|string|max:255',
-            'kategori_id'   => 'required|exists:kategoris,id',
-            'lokasi_id'     => 'required|exists:lokasis,id',
-            'jumlah_total'  => 'required|integer|min:0',
-            'stok'          => 'required|integer|min:0|lte:jumlah_total',
-            'kondisi'       => 'required|in:baik,rusak,perlu_perbaikan'
+            'nama_barang'  => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,id',
+            'lokasi_id'    => 'required|exists:lokasis,id',
+            'jumlah_total' => 'required|integer|min:0',
+            'stok'         => 'required|integer|min:0|lte:jumlah_total',
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan'
         ];
 
-        // Only admin can change bidang
         if ($user->role == 'admin') {
             $rules['bidang_id'] = 'required|exists:bidangs,id';
         }
 
         $validated = $r->validate($rules);
 
-        // Prepare update data
         $updateData = [
-            'nama_barang'   => $validated['nama_barang'],
-            'kategori_id'   => $validated['kategori_id'],
-            'lokasi_id'     => $validated['lokasi_id'],
-            'jumlah_total'  => $validated['jumlah_total'],
-            'stok'          => $validated['stok'],
-            'kondisi'       => $validated['kondisi']
+            'nama_barang'  => $validated['nama_barang'],
+            'kategori_id'  => $validated['kategori_id'],
+            'lokasi_id'    => $validated['lokasi_id'],
+            'jumlah_total' => $validated['jumlah_total'],
+            'stok'         => $validated['stok'],
+            'kondisi'      => $validated['kondisi']
         ];
 
-        // Only admin can update bidang
         if ($user->role == 'admin' && isset($validated['bidang_id'])) {
             $updateData['bidang_id'] = $validated['bidang_id'];
         }
 
         $barang->update($updateData);
 
-        return redirect()->route('barang.index')
-                         ->with('success','Barang berhasil diperbarui!');
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui!');
     }
 
     public function destroy(Barang $barang)
     {
         $this->authorizeBarang($barang);
 
-        $namaBarang = $barang->nama_barang;
+        $nama = $barang->nama_barang;
         $barang->delete();
 
-        return redirect()->route('barang.index')
-                         ->with('success', "Barang '{$namaBarang}' berhasil dihapus!");
+        return redirect()->route('barang.index')->with('success', "Barang '{$nama}' berhasil dihapus!");
     }
 
-    /**
-     * Authorization check for petugas
-     * Petugas can only access barang from their bidang
-     */
     private function authorizeBarang($barang)
     {
         $user = Auth::user();
-
         if ($user->role == 'petugas' && $barang->bidang_id != $user->bidang_id) {
             abort(403, 'Anda tidak memiliki akses ke barang dari bidang lain.');
         }

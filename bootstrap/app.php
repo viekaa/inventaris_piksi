@@ -16,34 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         /**
          * ==========================
-         * WEB (Login, Session, Role)
-         * ==========================
-         */
-        $middleware->web(append: [
-            \Illuminate\Cookie\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-        ]);
-
-        /**
-         * ==========================
-         * API (Flutter, Postman)
-         * ==========================
-         */
-        $middleware->api(append: [
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ]);
-
-        /**
-         * ==========================
-         * Custom middleware
+         * Custom middleware alias
          * ==========================
          */
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'  => \App\Http\Middleware\RoleMiddleware::class,
+            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
     })
 
