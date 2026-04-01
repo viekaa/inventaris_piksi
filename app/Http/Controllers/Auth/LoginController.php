@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -18,26 +20,37 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    protected function authenticated($request, $user)
-    {
-        if ($user->role === 'admin') {
-            return redirect('/admin/dashboard');
-        }
+   protected function authenticated($request, $user)
+{
+    // ❌ CEK STATUS DULU
+    if ($user->status !== 'aktif') {
+        Auth::logout(); // paksa logout
 
-        if ($user->role === 'petugas') {
-            $map = [
-                'Akademik' => 'akademik',
-                'Keuangan' => 'keuangan',
-                'Kemahasiswaan' => 'kemahasiswaan',
-                'Umum' => 'umum',
-            ];
+        Alert::error('Akses ditolak', 'Akun kamu sudah dinonaktifkan');
 
-            $bidangName = optional($user->bidang)->nama_bidang;
+        return redirect()->route('login');
+    }
 
-            return redirect('/petugas/' . ($map[$bidangName] ?? 'umum'));
-        }
-
-        // ⛔ JANGAN KE /home LAGI
+    // ✅ ADMIN
+    if ($user->role === 'admin') {
         return redirect('/admin/dashboard');
     }
+
+    // ✅ PETUGAS
+    if ($user->role === 'petugas') {
+        $map = [
+            'Akademik' => 'akademik',
+            'Keuangan' => 'keuangan',
+            'Kemahasiswaan' => 'kemahasiswaan',
+            'Umum' => 'umum',
+        ];
+
+        $bidangName = optional($user->bidang)->nama_bidang;
+
+        return redirect('/petugas/' . ($map[$bidangName] ?? 'umum'));
+    }
+
+    // fallback
+    return redirect('/admin/dashboard');
+}
 }

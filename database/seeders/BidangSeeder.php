@@ -9,7 +9,7 @@ class BidangSeeder extends Seeder
 {
     public function run(): void
     {
-        $data = ['Umum','Akademik','Keuangan','Kemahasiswaan'];
+        $data = ['Admin','Umum','Akademik','Keuangan','Kemahasiswaan'];
 
         foreach($data as $b){
             Bidang::firstOrCreate(['nama_bidang'=>$b]);

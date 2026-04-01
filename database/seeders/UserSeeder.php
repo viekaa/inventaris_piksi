@@ -12,6 +12,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Pastikan semua bidang ada
+        $adm  = Bidang::updateOrCreate(['nama_bidang' => 'Admin']);
         $umum = Bidang::updateOrCreate(['nama_bidang' => 'Umum']);
         $akd  = Bidang::updateOrCreate(['nama_bidang' => 'Akademik']);
         $keu  = Bidang::updateOrCreate(['nama_bidang' => 'Keuangan']);
@@ -24,6 +25,17 @@ class UserSeeder extends Seeder
                 'name' => 'Giffari D.R',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
+                'bidang_id' => $adm->id,
+            ]
+        );
+
+        // Petugas Umum
+        User::updateOrCreate(
+            ['email' => 'umum@piksi.com'],
+            [
+                'name' => 'Hilmi',
+                'password' => Hash::make('umum123'),
+                'role' => 'petugas',
                 'bidang_id' => $umum->id,
             ]
         );

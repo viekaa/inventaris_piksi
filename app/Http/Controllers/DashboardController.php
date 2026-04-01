@@ -48,7 +48,7 @@ class DashboardController extends Controller
             ->keyBy('bidang_id');
 
         // Gabungkan per bidang
-        $bidangs    = Bidang::all();
+        $bidangs = Bidang::whereNotIn('nama_bidang', ['Admin'])->get();
         $statBidang = $bidangs->map(function ($bidang) use ($jumlahPerBidang, $dipinjamPerBidang, $dikembalikanPerBidang) {
             return [
                 'nama'         => $bidang->nama_bidang,
@@ -61,10 +61,13 @@ class DashboardController extends Controller
 
         // Barang stok menipis
         $barangHabis = Barang::where('stok', '<=', 5)
-            ->with('bidang', 'lokasi')
-            ->latest()
-            ->take(5)
-            ->get();
+    ->whereHas('bidang', function($q){
+        $q->where('nama_bidang', '!=', 'Admin');
+    })
+    ->with('bidang', 'lokasi')
+    ->latest()
+    ->take(5)
+    ->get();
 
         // Aktivitas terbaru
         $recentPeminjaman = Peminjaman::with('barang.bidang')
@@ -79,3 +82,4 @@ class DashboardController extends Controller
         ));
     }
 }
+

@@ -4,23 +4,30 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;   // ← WAJIB
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;   // ← WAJIB
+    use HasApiTokens, Notifiable;
 
     protected $fillable = [
-        'name','email','password','role','bidang_id'
+        'name',
+        'email',
+        'password',
+        'role',
+        'bidang_id',
+        'status',       // ← INI YANG KURANG, makanya update status tidak nyimpen
     ];
 
-    protected $hidden = ['password','remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
-    public function bidang(){
+    public function bidang()
+    {
         return $this->belongsTo(Bidang::class);
     }
 
-    public function barangs(){
-        return $this->hasMany(Barang::class,'bidang_id','bidang_id');
+    public function barangs()
+    {
+        return $this->hasMany(Barang::class, 'bidang_id', 'bidang_id');
     }
 }

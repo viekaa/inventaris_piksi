@@ -125,8 +125,8 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @php
-                                                $bidangs = \App\Models\Bidang::all();
+                                           @php
+                                            $bidangs = \App\Models\Bidang::where('nama_bidang', '!=', 'Admin')->get();
                                             @endphp
                                             @foreach($bidangs as $bidang)
                                             <tr>
@@ -217,14 +217,12 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @php
-                                                $barangHabis = \App\Models\Barang::where('stok','<=',5)->with('bidang','lokasi')->latest()->take(5)->get();
-                                            @endphp
+
                                             @forelse($barangHabis as $item)
                                             <tr>
                                                 <td class="border-top-0 px-2 py-4 font-14">{{ $item->nama_barang }}</td>
-                                                <td class="border-top-0 text-muted px-2 py-4 font-14">{{ $item->bidang->nama_bidang }}</td>
-                                                <td class="border-top-0 text-muted px-2 py-4 font-14">{{ $item->lokasi->nama_lokasi }}</td>
+                                                <td class="border-top-0 text-muted px-2 py-4 font-14">{{ $item->bidang->nama_bidang ?? '-' }}</td>
+                                                <td class="border-top-0 text-muted px-2 py-4 font-14">{{ $item->lokasi->nama_lokasi ?? '-' }}</td>
                                                 <td class="border-top-0 px-2 py-4">
                                                     <span class="badge badge-warning font-14">{{ $item->stok }}</span>
                                                 </td>

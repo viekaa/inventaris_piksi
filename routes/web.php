@@ -9,80 +9,64 @@ use App\Http\Controllers\{
     PengembalianController,
     KategoriController,
     LokasiController,
-    PetugasController
+    PetugasController,
+    DashboardController
 };
 
-/*
-|--------------------------------------------------------------------------
-| AUTH
-|--------------------------------------------------------------------------
-*/
 Auth::routes();
 
-Route::get('/', function () {
-    return view('auth.login');
-})->name('login');
+Route::get('/', fn () => view('auth.login'))->name('login');
 
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN AREA
+| ADMIN
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])
+Route::middleware(['auth', 'role:admin', 'status'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        // Dashboard
-        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        /*
-        |----------------------------------------------------------------------
-        | MANAJEMEN
-        |----------------------------------------------------------------------
-        */
         Route::resource('bidang',   BidangController::class);
         Route::resource('kategori', KategoriController::class);
         Route::resource('lokasi',   LokasiController::class);
-        Route::resource('petugas',  PetugasController::class);
 
-        /*
-        |----------------------------------------------------------------------
-        | OPERASIONAL (admin hanya lihat)
-        |----------------------------------------------------------------------
-        */
+        // Aktifkan harus SEBELUM resource agar tidak tertimpa
+        Route::put('pengguna/{user}/aktifkan', [PetugasController::class, 'aktifkan'])->name('petugas.aktifkan');
+        Route::resource('petugas', PetugasController::class)->parameters(['petugas' => 'user']);
+
         Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-            Route::get('/export-pdf',    [PeminjamanController::class, 'exportPdf'])->name('export-pdf');
-            Route::get('/',              [PeminjamanController::class, 'index'])->name('index');
-            Route::get('/{peminjaman}',  [PeminjamanController::class, 'show'])->name('show');
+            Route::get('/export-pdf',     [PeminjamanController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/',               [PeminjamanController::class, 'index'])->name('index');
+            Route::get('/{peminjaman}',   [PeminjamanController::class, 'show'])->name('show');
         });
 
         Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
-            Route::get('/export-pdf',      [PengembalianController::class, 'exportPdf'])->name('export-pdf');
-            Route::get('/',                [PengembalianController::class, 'index'])->name('index');
-            Route::get('/{pengembalian}',  [PengembalianController::class, 'show'])->name('show');
+            Route::get('/export-pdf',     [PengembalianController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/',               [PengembalianController::class, 'index'])->name('index');
+            Route::get('/{pengembalian}', [PengembalianController::class, 'show'])->name('show');
         });
     });
 
 
 /*
 |--------------------------------------------------------------------------
-| PETUGAS AREA
+| PETUGAS
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:petugas'])
+Route::middleware(['auth', 'role:petugas', 'status'])
     ->prefix('petugas')
     ->name('petugas.')
     ->group(function () {
 
-        // Dashboard per-bidang
         Route::get('/akademik',      fn () => view('petugas.akademik'))->name('akademik');
         Route::get('/keuangan',      fn () => view('petugas.keuangan'))->name('keuangan');
         Route::get('/kemahasiswaan', fn () => view('petugas.kemahasiswaan'))->name('kemahasiswaan');
         Route::get('/umum',          fn () => view('petugas.umum'))->name('umum');
 
-        // Operasional (full CRUD) + export PDF
         Route::get('/peminjaman/export-pdf',   [PeminjamanController::class,   'exportPdf'])->name('peminjaman.export-pdf');
         Route::get('/pengembalian/export-pdf', [PengembalianController::class, 'exportPdf'])->name('pengembalian.export-pdf');
 
@@ -108,6 +92,5 @@ Route::middleware(['auth', 'role:admin,petugas'])
 | AKSI KHUSUS
 |--------------------------------------------------------------------------
 */
-Route::post('/peminjaman/{peminjaman}/kembalikan',
-    [PeminjamanController::class, 'kembalikan']
-)->name('peminjaman.kembalikan');
+Route::post('/peminjaman/{peminjaman}/kembalikan', [PeminjamanController::class, 'kembalikan'])
+    ->name('peminjaman.kembalikan');

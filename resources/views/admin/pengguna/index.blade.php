@@ -4,6 +4,7 @@
 
 <div class="container-fluid">
 
+    <!-- Success Message -->
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
         <div class="d-flex align-items-center">
@@ -55,7 +56,8 @@
                                     <th class="col-nama-petugas">Nama</th>
                                     <th class="col-email-petugas">Email</th>
                                     <th class="col-bidang-petugas">Bidang</th>
-                                    <th class="col-role-petugas text-center">Role</th>
+                                    <th class="text-center col-role-petugas">Role</th>
+                                    <th class="text-center col-status-petugas">Status</th>
                                     <th class="text-center col-aksi-petugas">Aksi</th>
                                 </tr>
                             </thead>
@@ -71,23 +73,53 @@
                                             {{ ucfirst($item->role) }}
                                         </span>
                                     </td>
+                                    <td class="text-center">
+                                        @if($item->status == 'aktif')
+                                            <span class="badge-status-petugas badge-aktif">Aktif</span>
+                                        @else
+                                            <span class="badge-status-petugas badge-nonaktif">Nonaktif</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="action-buttons-petugas">
+
+                                            <!-- Tombol Edit -->
                                             <a href="{{ route('admin.petugas.edit', $item->id) }}"
                                                class="btn-action-petugas btn-edit-petugas"
                                                title="Edit">
                                                 <i class="far fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('admin.petugas.destroy', $item->id) }}"
-                                                  method="POST"
-                                                  class="d-inline-block"
-                                                  onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-action-petugas btn-delete-petugas" title="Hapus">
-                                                    <i class="far fa-trash-alt"></i>
-                                                </button>
-                                            </form>
+
+                                            @if($item->status == 'aktif')
+                                                <!-- NONAKTIFKAN -->
+                                                <form action="{{ route('admin.petugas.destroy', $item->id) }}"
+                                                      method="POST"
+                                                      class="d-inline-block"
+                                                      onsubmit="return confirm('Nonaktifkan akun ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="btn-action-petugas btn-delete-petugas"
+                                                            title="Nonaktifkan">
+                                                        <i class=" fas fa-fire"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <!-- AKTIFKAN -->
+                                                <form action="{{ route('admin.petugas.aktifkan', $item->id) }}"
+                                                      method="POST"
+                                                      class="d-inline-block"
+                                                      onsubmit="return confirm('Aktifkan kembali akun ini?')">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit"
+                                                            class="btn-action-petugas btn-activate-petugas"
+                                                            title="Aktifkan">
+                                                        <i class="fas fa-user"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
                                         </div>
                                     </td>
                                 </tr>
@@ -103,6 +135,11 @@
 </div>
 
 <style>
+/* ===== TYPOGRAPHY ===== */
+:root {
+    --font-primary-petugas: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 /* ===== CARD PETUGAS ===== */
 .custom-card-petugas {
     border: none;
@@ -115,10 +152,10 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* ===== HEADER PETUGAS ===== */
+/* ===== HEADER ===== */
 .card-title-petugas {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: -0.5px;
     color: #1a1a1a;
     margin: 0;
@@ -134,10 +171,10 @@
 .header-actions-petugas {
     display: flex;
     gap: 16px;
-    align-items: center;
+    align-items: center; fas fa-fire
 }
 
-/* ===== SEARCH PETUGAS ===== */
+/* ===== SEARCH ===== */
 .search-wrapper-petugas {
     position: relative;
     width: 340px;
@@ -180,7 +217,7 @@
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* ===== BUTTON TAMBAH PETUGAS ===== */
+/* ===== BUTTON TAMBAH ===== */
 .btn-add-petugas {
     display: inline-flex;
     align-items: center;
@@ -191,7 +228,7 @@
     border: none;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
     box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
@@ -208,7 +245,7 @@
 .btn-add-petugas:active { transform: translateY(0); }
 .btn-add-petugas i { font-size: 15px; }
 
-/* ===== TABLE PETUGAS ===== */
+/* ===== TABLE ===== */
 .custom-table-petugas {
     margin: 0;
     border-collapse: separate;
@@ -223,7 +260,7 @@
     padding: 18px 20px;
     color: #fff;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     border: none;
@@ -235,12 +272,13 @@
 .custom-table-petugas thead tr th:last-child  { border-radius: 0 12px 0 0; }
 
 /* Column widths */
-.col-no-petugas     { width: 60px; text-align: center; }
+.col-no-petugas     { width: 100px; text-align: center; }
 .col-nama-petugas   { min-width: 160px; }
 .col-email-petugas  { min-width: 200px; }
 .col-bidang-petugas { min-width: 140px; }
 .col-role-petugas   { width: 110px; }
-.col-aksi-petugas   { width: 120px; }
+.col-status-petugas { width: 110px; }
+.col-aksi-petugas   { width: 150px; }
 
 .custom-table-petugas tbody tr {
     border-bottom: 1px solid #f1f5f9;
@@ -261,27 +299,40 @@
     font-size: 14px;
 }
 
-/* ===== TABLE CELLS PETUGAS ===== */
-.col-number-petugas       { font-weight: 600; color: #9ca3af; font-size: 13px; text-align: center; }
-.col-nama-petugas-value   { font-weight: 600; color: #1f2937; font-size: 14px; }
+/* ===== TABLE CELLS ===== */
+.col-number-petugas       { font-weight: 500; color: #9ca3af; font-size: 13px; text-align: center; }
+.col-nama-petugas-value   { font-weight: 500; color: #1f2937; font-size: 14px; }
 .col-email-petugas-value  { color: #4b5563; font-size: 13px; }
 .col-bidang-petugas-value { color: #4b5563; font-size: 13px; }
 
-/* ===== BADGE ROLE PETUGAS ===== */
+/* ===== BADGE ROLE ===== */
 .badge-role-petugas {
     display: inline-flex;
     align-items: center;
     padding: 5px 14px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.3px;
 }
 
-.badge-admin   { background: rgba(102, 126, 234, 0.12); color: #667eea; }
-.badge-petugas { background: rgba(23, 162, 184, 0.12);  color: #138496; }
+.badge-admin   { background: rgba(102,126,234,0.12); color: #667eea; }
+.badge-petugas { background: rgba(23,162,184,0.12);  color: #138496; }
 
-/* ===== ACTION BUTTONS PETUGAS ===== */
+/* ===== BADGE STATUS ===== */
+.badge-status-petugas {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-aktif    { background: rgba(16,185,129,0.12); color: #059669; }
+.badge-nonaktif { background: rgba(239,68,68,0.12);  color: #dc2626; }
+
+/* ===== ACTION BUTTONS ===== */
 .action-buttons-petugas {
     display: flex;
     gap: 10px;
@@ -304,6 +355,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+/* Edit — abu, icon far fa-edit (sama dengan Lokasi) */
 .btn-edit-petugas { background: #6c757d; color: #fff; }
 .btn-edit-petugas:hover {
     background: #5a6268;
@@ -312,11 +364,22 @@
     box-shadow: 0 6px 16px rgba(108, 117, 125, 0.35);
 }
 
+/* Delete — merah, icon far fa-trash-alt (sama dengan Lokasi) */
 .btn-delete-petugas { background: #dc3545; color: #fff; }
 .btn-delete-petugas:hover {
     background: #c82333;
+    color: #fff;
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 6px 16px rgba(220, 53, 69, 0.35);
+}
+
+/* Aktifkan — hijau, icon fas fa-user-check */
+.btn-activate-petugas { background: #28a745; color: #fff; }
+.btn-activate-petugas:hover {
+    background: #218838;
+    color: #fff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.35);
 }
 
 .btn-action-petugas:active { transform: translateY(0) scale(0.98); }
@@ -329,19 +392,22 @@
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 24px;
-    animation: slideDownPetugas 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .alert-success i      { color: #059669; }
 .alert-success strong { color: #065f46; }
 .alert-success div    { color: #047857; }
 
-@keyframes slideDownPetugas {
+.btn-close { opacity: 0.6; }
+.btn-close:hover { opacity: 1; }
+
+@keyframes slideDown {
     from { opacity: 0; transform: translateY(-20px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== RESPONSIVE PETUGAS ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
     .header-actions-petugas { flex-wrap: wrap; }
     .search-wrapper-petugas { width: 280px; }

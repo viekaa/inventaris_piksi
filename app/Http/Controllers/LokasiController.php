@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lokasi;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class LokasiController extends Controller
 {
@@ -27,8 +28,8 @@ class LokasiController extends Controller
         Lokasi::create([
             'nama_lokasi' => $request->nama_lokasi
         ]);
-
-        return redirect()->route('admin.lokasi.index')->with('success','Lokasi berhasil ditambahkan');
+          Alert::success('Berhasil', 'Lokasi berhasil ditambahkan');
+        return redirect()->route('admin.lokasi.index');
     }
 
     public function show(Lokasi $lokasi)
@@ -51,17 +52,20 @@ class LokasiController extends Controller
             'nama_lokasi' => $request->nama_lokasi
         ]);
 
-        return redirect()->route('admin.lokasi.index')->with('success','Lokasi berhasil diupdate');
+        Alert::success('Berhasil', 'Lokasi berhasil diperbarui');
+        return redirect()->route('admin.lokasi.index');
     }
-
+    
     public function destroy(Lokasi $lokasi)
     {
         if ($lokasi->barangs()->count() > 0) {
-            return back()->with('error','Lokasi masih dipakai oleh barang, tidak bisa dihapus.');
+            Alert::error('Gagal','Lokasi masih dipakai oleh barang, tidak bisa dihapus.' );
+            return back();
         }
 
         $lokasi->delete();
-        return redirect()->route('admin.lokasi.index')->with('success','Lokasi berhasil dihapus');
+         Alert::success('Berhasil', 'Lokasi berhasil dihapus');
+        return redirect()->route('admin.lokasi.index');
     }
 
 }

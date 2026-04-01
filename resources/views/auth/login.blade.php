@@ -21,7 +21,15 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Akses Ditolak',
+        text: '{{ session('error') }}'
+    });
+</script>
+@endif
 <body>
     <div class="main-wrapper">
         <!-- ============================================================== -->
@@ -94,6 +102,7 @@
     <script>
         $(".preloader ").fadeOut();
     </script>
+    @include('sweetalert::alert')
 </body>
 
 </html>
