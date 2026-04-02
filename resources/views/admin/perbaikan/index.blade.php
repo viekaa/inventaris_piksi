@@ -4,44 +4,26 @@
 
 <div class="container-fluid">
 
-    {{-- Alert --}}
-    @if(session('ok'))
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-check-circle mr-2" style="font-size:18px;color:#059669"></i>
-            <div><strong>Berhasil!</strong> {{ session('ok') }}</div>
-        </div>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    @endif
-
-    {{-- ============================================================ --}}
-    {{-- SECTION: PERLU PERBAIKAN                                     --}}
-    {{-- ============================================================ --}}
+    {{-- ── SECTION: PERLU PERBAIKAN ──────────────────────────────────── --}}
     <div class="row">
         <div class="col-lg-12">
             <div class="card custom-card">
                 <div class="card-body p-4">
-
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h4 class="card-title mb-1">
-                                <span class="badge-kondisi-header badge-perbaikan mr-2">
+                                <span class="icon-header icon-perbaikan mr-2">
                                     <i class="fas fa-tools"></i>
                                 </span>
                                 Barang Perlu Perbaikan
                             </h4>
                             <p class="card-subtitle">Barang yang dikembalikan dalam kondisi perlu diperbaiki</p>
                         </div>
-                        <span class="count-badge badge-perbaikan-count">
-                            {{ $perluPerbaikan->count() }} barang
-                        </span>
+                        <span class="count-badge count-perbaikan">{{ $perluPerbaikan->count() }} barang</span>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table custom-table" id="tablePerbaikan">
+                        <table class="table custom-table">
                             <thead>
                                 <tr>
                                     <th class="col-no">No</th>
@@ -49,8 +31,8 @@
                                     <th>Kategori</th>
                                     <th>Bidang</th>
                                     <th>Lokasi</th>
-                                    <th class="text-center col-stok">Stok Saat Ini</th>
-                                    <th class="text-center col-kondisi">Kondisi Sekarang</th>
+                                    <th class="text-center">Stok</th>
+                                    <th class="text-center">Kondisi</th>
                                     <th class="text-center col-aksi">Update Kondisi</th>
                                 </tr>
                             </thead>
@@ -59,48 +41,36 @@
                                 <tr>
                                     <td class="col-number">{{ $loop->iteration }}</td>
                                     <td class="col-nama">{{ $item->nama_barang }}</td>
-                                    <td>
-                                        <span class="badge-kategori">{{ $item->kategori->nama_kategori }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge-bidang">{{ $item->bidang->nama_bidang ?? '-' }}</span>
-                                    </td>
+                                    <td><span class="badge-kategori">{{ $item->kategori->nama_kategori }}</span></td>
+                                    <td><span class="badge-bidang">{{ $item->bidang->nama_bidang ?? '-' }}</span></td>
                                     <td class="col-lokasi">
-                                        <i class="fas fa-map-marker-alt icon-lokasi"></i>
-                                        {{ $item->lokasi->nama_lokasi }}
+                                        <i class="fas fa-map-marker-alt icon-lokasi"></i>{{ $item->lokasi->nama_lokasi }}
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge-stok">{{ $item->stok }}</span>
+                                        <span class="badge-total">{{ $item->stok }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge-kondisi" style="background:#FFF8E1;color:#F9A825;">
-                                            Perlu Perbaikan
-                                        </span>
+                                        <span class="badge-kondisi" style="background:#FFF8E1;color:#F9A825;">Perlu Perbaikan</span>
                                     </td>
                                     <td class="text-center">
-                                        <form action="{{ route('admin.perbaikan.update', $item->id) }}"
-                                              method="POST"
-                                              class="form-inline justify-content-center form-update"
-                                              onsubmit="return confirmUpdate(this)">
-                                            @csrf
-                                            @method('PATCH')
-                                            <select name="kondisi" class="select-kondisi mr-2">
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <select class="select-kondisi" data-id="{{ $item->id }}" data-current="perlu_perbaikan">
                                                 <option value="perlu_perbaikan" selected>Perlu Perbaikan</option>
                                                 <option value="baik">✓ Sudah Baik</option>
                                                 <option value="rusak">✗ Rusak</option>
                                             </select>
-                                            <button type="submit" class="btn-update">
+                                            <button class="btn-update" onclick="updateKondisi(this)">
                                                 <i class="fas fa-save"></i> Simpan
                                             </button>
-                                        </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
                                     <td colspan="8" class="text-center py-5">
                                         <div class="empty-state">
-                                            <i class="fas fa-check-circle empty-icon text-success"></i>
-                                            <p class="mt-2 text-muted">Tidak ada barang yang perlu perbaikan</p>
+                                            <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                                            <p>Tidak ada barang yang perlu perbaikan</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -108,37 +78,31 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- SECTION: RUSAK                                               --}}
-    {{-- ============================================================ --}}
+    {{-- ── SECTION: RUSAK ─────────────────────────────────────────────── --}}
     <div class="row mt-2">
         <div class="col-lg-12">
             <div class="card custom-card">
                 <div class="card-body p-4">
-
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h4 class="card-title mb-1">
-                                <span class="badge-kondisi-header badge-rusak mr-2">
+                                <span class="icon-header icon-rusak mr-2">
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </span>
                                 Barang Rusak
                             </h4>
                             <p class="card-subtitle">Barang yang dikembalikan dalam kondisi rusak</p>
                         </div>
-                        <span class="count-badge badge-rusak-count">
-                            {{ $rusak->count() }} barang
-                        </span>
+                        <span class="count-badge count-rusak">{{ $rusak->count() }} barang</span>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table custom-table" id="tableRusak">
+                        <table class="table custom-table">
                             <thead>
                                 <tr>
                                     <th class="col-no">No</th>
@@ -146,8 +110,8 @@
                                     <th>Kategori</th>
                                     <th>Bidang</th>
                                     <th>Lokasi</th>
-                                    <th class="text-center col-stok">Stok Saat Ini</th>
-                                    <th class="text-center col-kondisi">Kondisi Sekarang</th>
+                                    <th class="text-center">Stok</th>
+                                    <th class="text-center">Kondisi</th>
                                     <th class="text-center col-aksi">Update Kondisi</th>
                                 </tr>
                             </thead>
@@ -156,48 +120,36 @@
                                 <tr>
                                     <td class="col-number">{{ $loop->iteration }}</td>
                                     <td class="col-nama">{{ $item->nama_barang }}</td>
-                                    <td>
-                                        <span class="badge-kategori">{{ $item->kategori->nama_kategori }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge-bidang">{{ $item->bidang->nama_bidang ?? '-' }}</span>
-                                    </td>
+                                    <td><span class="badge-kategori">{{ $item->kategori->nama_kategori }}</span></td>
+                                    <td><span class="badge-bidang">{{ $item->bidang->nama_bidang ?? '-' }}</span></td>
                                     <td class="col-lokasi">
-                                        <i class="fas fa-map-marker-alt icon-lokasi"></i>
-                                        {{ $item->lokasi->nama_lokasi }}
+                                        <i class="fas fa-map-marker-alt icon-lokasi"></i>{{ $item->lokasi->nama_lokasi }}
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge-stok">{{ $item->stok }}</span>
+                                        <span class="badge-total">{{ $item->stok }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge-kondisi" style="background:#FDECEA;color:#C62828;">
-                                            Rusak
-                                        </span>
+                                        <span class="badge-kondisi" style="background:#FDECEA;color:#C62828;">Rusak</span>
                                     </td>
                                     <td class="text-center">
-                                        <form action="{{ route('admin.perbaikan.update', $item->id) }}"
-                                              method="POST"
-                                              class="form-inline justify-content-center form-update"
-                                              onsubmit="return confirmUpdate(this)">
-                                            @csrf
-                                            @method('PATCH')
-                                            <select name="kondisi" class="select-kondisi mr-2">
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <select class="select-kondisi" data-id="{{ $item->id }}" data-current="rusak">
                                                 <option value="rusak" selected>Rusak</option>
                                                 <option value="baik">✓ Sudah Baik</option>
                                                 <option value="perlu_perbaikan">⚠ Perlu Perbaikan</option>
                                             </select>
-                                            <button type="submit" class="btn-update">
+                                            <button class="btn-update" onclick="updateKondisi(this)">
                                                 <i class="fas fa-save"></i> Simpan
                                             </button>
-                                        </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
                                     <td colspan="8" class="text-center py-5">
                                         <div class="empty-state">
-                                            <i class="fas fa-check-circle empty-icon text-success"></i>
-                                            <p class="mt-2 text-muted">Tidak ada barang yang rusak</p>
+                                            <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                                            <p>Tidak ada barang yang rusak</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -205,7 +157,6 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -213,39 +164,37 @@
 
 </div>
 
-{{-- ============================================================ --}}
-{{-- STYLE                                                         --}}
-{{-- ============================================================ --}}
 <style>
 /* ===== CARD ===== */
 .custom-card {
     border: none;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-    transition: box-shadow 0.3s;
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .custom-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
 }
 
 /* ===== HEADER ===== */
 .card-title {
     font-size: 20px;
     font-weight: 700;
-    letter-spacing: -0.3px;
     color: #1a1a1a;
     margin: 0;
     display: flex;
     align-items: center;
+    gap: 8px;
 }
 .card-subtitle {
     font-size: 13px;
     color: #6c757d;
     margin: 4px 0 0 0;
+    font-weight: 400;
 }
 
-/* ===== BADGE HEADER ICONS ===== */
-.badge-kondisi-header {
+/* ===== ICON HEADER ===== */
+.icon-header {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -253,26 +202,33 @@
     height: 34px;
     border-radius: 10px;
     font-size: 14px;
+    flex-shrink: 0;
 }
-.badge-perbaikan { background: #FFF8E1; color: #F9A825; }
-.badge-rusak     { background: #FDECEA; color: #C62828; }
+.icon-perbaikan { background: #FFF8E1; color: #F9A825; }
+.icon-rusak     { background: #FDECEA; color: #C62828; }
 
-/* ===== COUNT BADGES ===== */
+/* ===== COUNT BADGE ===== */
 .count-badge {
     display: inline-block;
-    padding: 8px 20px;
-    border-radius: 20px;
+    padding: 7px 16px;
+    border-radius: 8px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
-.badge-perbaikan-count { background: #FFF8E1; color: #F57F17; border: 1.5px solid #FFE082; }
-.badge-rusak-count     { background: #FDECEA; color: #C62828; border: 1.5px solid #FFCDD2; }
+.count-perbaikan { background: #FFF8E1; color: #F57F17; border: 1.5px solid #FFE082; }
+.count-rusak     { background: #FDECEA; color: #C62828; border: 1.5px solid #FFCDD2; }
 
 /* ===== TABLE ===== */
-.custom-table { margin: 0; border-collapse: separate; border-spacing: 0; }
-.custom-table thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.custom-table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.custom-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
 .custom-table thead tr th {
-    padding: 16px;
+    padding: 18px 20px;
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -280,30 +236,56 @@
     letter-spacing: 0.8px;
     border: none;
     vertical-align: middle;
+    white-space: nowrap;
 }
 .custom-table thead tr th:first-child { border-radius: 12px 0 0 0; }
 .custom-table thead tr th:last-child  { border-radius: 0 12px 0 0; }
-.custom-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: all 0.2s; }
-.custom-table tbody tr:last-child { border-bottom: none; }
-.custom-table tbody tr:hover { background: #fafbfc; }
-.custom-table tbody td { padding: 14px 16px; vertical-align: middle; color: #374151; font-size: 14px; }
 
-/* ===== COLUMN WIDTHS ===== */
-.col-no    { width: 60px; }
-.col-stok  { width: 110px; }
-.col-kondisi { width: 150px; }
-.col-aksi  { width: 240px; }
+.col-no   { width: 70px; text-align: center; }
+.col-aksi { width: 300px; }
+
+.custom-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.custom-table tbody tr:last-child { border-bottom: none; }
+.custom-table tbody tr:hover {
+    background: linear-gradient(to right, #fafbfc 0%, #f8fafc 100%);
+    transform: scale(1.002);
+}
+.custom-table tbody td {
+    padding: 18px 20px;
+    vertical-align: middle;
+    color: #374151;
+    font-size: 14px;
+}
 
 /* ===== CELLS ===== */
-.col-number { font-weight: 600; color: #9ca3af; font-size: 13px; }
-.col-nama   { font-weight: 600; color: #1f2937; }
-.col-lokasi { color: #6b7280; font-size: 13px; }
-.icon-lokasi { color: #ef4444; margin-right: 4px; font-size: 12px; }
+.col-number {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 13px;
+    text-align: center;
+}
+.col-nama {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+}
+.col-lokasi {
+    color: #6b7280;
+    font-size: 13px;
+}
+.icon-lokasi {
+    color: #ef4444;
+    margin-right: 4px;
+    font-size: 12px;
+}
 
-/* ===== BADGES ===== */
+/* ===== BADGES — sama persis dengan peminjaman ===== */
 .badge-kategori {
     display: inline-block;
-    padding: 5px 12px;
+    padding: 7px 16px;
     background: #f3f4f6;
     color: #4b5563;
     border: 1px solid #e5e7eb;
@@ -313,7 +295,7 @@
 }
 .badge-bidang {
     display: inline-block;
-    padding: 5px 12px;
+    padding: 7px 16px;
     background: #eef2ff;
     color: #3730a3;
     border: 1px solid #c7d2fe;
@@ -321,24 +303,24 @@
     font-size: 12px;
     font-weight: 600;
 }
-.badge-stok {
+.badge-total {
     display: inline-block;
-    padding: 5px 14px;
+    padding: 7px 16px;
     background: #eff6ff;
     color: #1e40af;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 .badge-kondisi {
     display: inline-block;
-    padding: 6px 16px;
-    border-radius: 20px;
+    padding: 6px 14px;
+    border-radius: 8px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
-/* ===== FORM UPDATE ===== */
+/* ===== SELECT & UPDATE ===== */
 .select-kondisi {
     padding: 8px 12px;
     border: 1.5px solid #e5e7eb;
@@ -368,7 +350,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 .btn-update:hover {
@@ -376,31 +358,78 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(102,126,234,0.35);
 }
-.btn-update:active { transform: translateY(0); }
 
 /* ===== EMPTY STATE ===== */
-.empty-state { padding: 16px 0; }
-.empty-icon  { font-size: 36px; display: block; margin: 0 auto 8px; }
-
-/* ===== ALERT ===== */
-.alert-success {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border: none;
-    border-left: 4px solid #10b981;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #9ca3af;
 }
+.empty-state i  { font-size: 40px; opacity: 0.7; }
+.empty-state p  { font-size: 14px; margin: 0; }
 </style>
 
-{{-- ============================================================ --}}
-{{-- SCRIPT                                                        --}}
-{{-- ============================================================ --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function confirmUpdate(form) {
-    const select = form.querySelector('select[name="kondisi"]');
-    const kondisi = select.options[select.selectedIndex].text;
-    return confirm('Update kondisi barang menjadi "' + kondisi + '"?\n\nJika diubah ke "Sudah Baik", stok akan otomatis bertambah 1.');
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}';
+
+function updateKondisi(btn) {
+    const row     = btn.closest('tr');
+    const select  = row.querySelector('.select-kondisi');
+    const id      = select.dataset.id;
+    const kondisi = select.value;
+    const labelMap = { baik: 'Sudah Baik', rusak: 'Rusak', perlu_perbaikan: 'Perlu Perbaikan' };
+
+    const extra = kondisi === 'baik'
+        ? '<br><small class="text-success">Stok akan otomatis bertambah 1</small>'
+        : '';
+
+    Swal.fire({
+        title: 'Update Kondisi Barang',
+        html: `Ubah kondisi menjadi <strong>${labelMap[kondisi]}</strong>?${extra}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Update!',
+        cancelButtonText: 'Batal',
+    }).then(result => {
+        if (!result.isConfirmed) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(`/admin/perbaikan/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'X-HTTP-Method-Override': 'PATCH',
+            },
+            body: JSON.stringify({ kondisi }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                }).then(() => location.reload());
+            } else {
+                throw new Error(data.message ?? 'Terjadi kesalahan');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+            Swal.fire('Gagal!', err.message, 'error');
+        });
+    });
 }
 </script>
 

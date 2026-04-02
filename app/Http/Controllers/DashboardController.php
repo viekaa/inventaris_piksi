@@ -6,71 +6,63 @@ use App\Models\Barang;
 use App\Models\Bidang;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Statistik atas — 4 query ringan
-        $totalBarang       = Barang::count();
+        // Semua count dalam 1 query
+        $stats = DB::selectOne('
+            SELECT
+                COUNT(*) as total_barang,
+                SUM(CASE WHEN stok <= 5 THEN 1 ELSE 0 END) as stok_menipis,
+                SUM(CASE WHEN kondisi = "baik" THEN 1 ELSE 0 END) as jml_baik,
+                SUM(CASE WHEN kondisi = "rusak" THEN 1 ELSE 0 END) as jml_rusak,
+                SUM(CASE WHEN kondisi = "perlu_perbaikan" THEN 1 ELSE 0 END) as jml_perlu_perbaikan
+            FROM barangs
+        ');
+
+        $totalBarang       = $stats->total_barang;
+        $stokMenipis       = $stats->stok_menipis;
+        $jmlBaik           = $stats->jml_baik;
+        $jmlRusak          = $stats->jml_rusak;
+        $jmlPerluPerbaikan = $stats->jml_perlu_perbaikan;
+
         $totalPeminjaman   = Peminjaman::count();
         $totalPengembalian = Pengembalian::count();
-        $stokMenipis       = Barang::where('stok', '<=', 5)->count();
 
-        // Kondisi barang — 1 query digroup
-        $kondisi = Barang::selectRaw('kondisi, count(*) as total')
-            ->groupBy('kondisi')
-            ->pluck('total', 'kondisi');
+        // Stat per bidang: 1 query JOIN semua sekaligus
+        $statBidang = DB::select('
+            SELECT
+                b.id,
+                b.nama_bidang as nama,
+                COUNT(DISTINCT br.id) as jumlah,
+                SUM(CASE WHEN br.stok <= 5 THEN 1 ELSE 0 END) as stokMenipis,
+                SUM(CASE WHEN p.status = "dipinjam" THEN 1 ELSE 0 END) as dipinjam,
+                SUM(CASE WHEN p.status = "dikembalikan" THEN 1 ELSE 0 END) as dikembalikan
+            FROM bidangs b
+            LEFT JOIN barangs br ON br.bidang_id = b.id
+            LEFT JOIN peminjamans p ON p.barang_id = br.id
+            WHERE b.nama_bidang != "Admin"
+            GROUP BY b.id, b.nama_bidang
+        ');
 
-        $jmlBaik           = $kondisi['baik'] ?? 0;
-        $jmlPerluPerbaikan = $kondisi['perlu_perbaikan'] ?? 0;
-        $jmlRusak          = $kondisi['rusak'] ?? 0;
-
-        // Statistik barang per bidang — 1 query
-        $jumlahPerBidang = Barang::selectRaw('bidang_id, count(*) as jumlah, SUM(CASE WHEN stok <= 5 THEN 1 ELSE 0 END) as stok_menipis')
-            ->groupBy('bidang_id')
-            ->get()
-            ->keyBy('bidang_id');
-
-        // Statistik peminjaman per bidang — 2 query pakai join
-        $dipinjamPerBidang = Peminjaman::selectRaw('barangs.bidang_id, count(*) as total')
-            ->join('barangs', 'peminjamans.barang_id', '=', 'barangs.id')
-            ->where('peminjamans.status', 'dipinjam')
-            ->groupBy('barangs.bidang_id')
-            ->get()
-            ->keyBy('bidang_id');
-
-        $dikembalikanPerBidang = Peminjaman::selectRaw('barangs.bidang_id, count(*) as total')
-            ->join('barangs', 'peminjamans.barang_id', '=', 'barangs.id')
-            ->where('peminjamans.status', 'dikembalikan')
-            ->groupBy('barangs.bidang_id')
-            ->get()
-            ->keyBy('bidang_id');
-
-        // Gabungkan per bidang
-        $bidangs = Bidang::whereNotIn('nama_bidang', ['Admin'])->get();
-        $statBidang = $bidangs->map(function ($bidang) use ($jumlahPerBidang, $dipinjamPerBidang, $dikembalikanPerBidang) {
-            return [
-                'nama'         => $bidang->nama_bidang,
-                'jumlah'       => $jumlahPerBidang[$bidang->id]->jumlah ?? 0,
-                'stokMenipis'  => $jumlahPerBidang[$bidang->id]->stok_menipis ?? 0,
-                'dipinjam'     => $dipinjamPerBidang[$bidang->id]->total ?? 0,
-                'dikembalikan' => $dikembalikanPerBidang[$bidang->id]->total ?? 0,
-            ];
-        });
-
-        // Barang stok menipis
-        $barangHabis = Barang::where('stok', '<=', 5)
-    ->whereHas('bidang', function($q){
-        $q->where('nama_bidang', '!=', 'Admin');
-    })
-    ->with('bidang', 'lokasi')
-    ->latest()
-    ->take(5)
-    ->get();
+        // Barang stok menipis: pakai JOIN bukan whereHas
+        $barangHabis = DB::select('
+            SELECT br.nama_barang, br.stok,
+                   bi.nama_bidang, l.nama_lokasi
+            FROM barangs br
+            LEFT JOIN bidangs bi ON bi.id = br.bidang_id
+            LEFT JOIN lokasis l  ON l.id  = br.lokasi_id
+            WHERE br.stok <= 5
+              AND bi.nama_bidang != "Admin"
+            ORDER BY br.created_at DESC
+            LIMIT 5
+        ');
 
         // Aktivitas terbaru
-        $recentPeminjaman = Peminjaman::with('barang.bidang')
+        $recentPeminjaman = Peminjaman::with('barang.bidang:id,nama_bidang')
             ->latest()
             ->take(4)
             ->get();
@@ -82,4 +74,3 @@ class DashboardController extends Controller
         ));
     }
 }
-

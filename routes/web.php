@@ -10,13 +10,13 @@ use App\Http\Controllers\{
     KategoriController,
     LokasiController,
     PetugasController,
-    DashboardController
+    DashboardController,
+    PerbaikanController
 };
 
 Auth::routes();
 
 Route::get('/', fn () => view('auth.login'))->name('login');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -34,14 +34,13 @@ Route::middleware(['auth', 'role:admin', 'status'])
         Route::resource('kategori', KategoriController::class);
         Route::resource('lokasi',   LokasiController::class);
 
-        // Aktifkan harus SEBELUM resource agar tidak tertimpa
         Route::put('pengguna/{user}/aktifkan', [PetugasController::class, 'aktifkan'])->name('petugas.aktifkan');
         Route::resource('petugas', PetugasController::class)->parameters(['petugas' => 'user']);
 
         Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-            Route::get('/export-pdf',     [PeminjamanController::class, 'exportPdf'])->name('export-pdf');
-            Route::get('/',               [PeminjamanController::class, 'index'])->name('index');
-            Route::get('/{peminjaman}',   [PeminjamanController::class, 'show'])->name('show');
+            Route::get('/export-pdf',   [PeminjamanController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/',             [PeminjamanController::class, 'index'])->name('index');
+            Route::get('/{peminjaman}', [PeminjamanController::class, 'show'])->name('show');
         });
 
         Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
@@ -49,8 +48,13 @@ Route::middleware(['auth', 'role:admin', 'status'])
             Route::get('/',               [PengembalianController::class, 'index'])->name('index');
             Route::get('/{pengembalian}', [PengembalianController::class, 'show'])->name('show');
         });
-    });
 
+        // Perbaikan / Kondisi Barang
+        Route::prefix('perbaikan')->name('perbaikan.')->group(function () {
+            Route::get('/',           [PerbaikanController::class, 'index'])->name('index');
+            Route::patch('/{barang}', [PerbaikanController::class, 'update'])->name('update');
+        });
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -74,7 +78,6 @@ Route::middleware(['auth', 'role:petugas', 'status'])
         Route::resource('pengembalian', PengembalianController::class);
     });
 
-
 /*
 |--------------------------------------------------------------------------
 | BARANG (ADMIN + PETUGAS)
@@ -85,7 +88,6 @@ Route::middleware(['auth', 'role:admin,petugas'])
         Route::get('/barang/export-pdf', [BarangController::class, 'exportPdf'])->name('barang.export-pdf');
         Route::resource('barang', BarangController::class);
     });
-
 
 /*
 |--------------------------------------------------------------------------

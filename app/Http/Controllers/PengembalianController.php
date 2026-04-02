@@ -71,12 +71,12 @@ class PengembalianController extends Controller
         if (Auth::user()->role == 'admin') abort(403);
 
         $r->validate([
-            'peminjaman_id'    => 'required|exists:peminjamans,id',
-            'tgl_kembali_real' => 'required|date',
-            'kondisi.baik'     => 'required|integer|min:0',
-            'kondisi.rusak'    => 'required|integer|min:0',
+            'peminjaman_id'           => 'required|exists:peminjamans,id',
+            'tgl_kembali_real'        => 'required|date',
+            'kondisi.baik'            => 'required|integer|min:0',
+            'kondisi.rusak'           => 'required|integer|min:0',
             'kondisi.perlu_perbaikan' => 'required|integer|min:0',
-            'catatan'          => 'nullable|string'
+            'catatan'                 => 'nullable|string',
         ]);
 
         $peminjaman = Peminjaman::with('barang')->findOrFail($r->peminjaman_id);
@@ -85,7 +85,9 @@ class PengembalianController extends Controller
         if ($peminjaman->status === 'dikembalikan') return back()->with('error', 'Sudah dikembalikan');
 
         $total = $r->kondisi['baik'] + $r->kondisi['rusak'] + $r->kondisi['perlu_perbaikan'];
-        if ($total != $peminjaman->jumlah) return back()->withErrors(['kondisi' => 'Total harus ' . $peminjaman->jumlah]);
+        if ($total != $peminjaman->jumlah) {
+            return back()->withErrors(['kondisi' => 'Total harus ' . $peminjaman->jumlah]);
+        }
 
         $hariTelat = 0;
         if ($r->tgl_kembali_real > $peminjaman->tgl_kembali_rencana) {
@@ -97,7 +99,7 @@ class PengembalianController extends Controller
             'peminjaman_id'    => $peminjaman->id,
             'tgl_kembali_real' => $r->tgl_kembali_real,
             'hari_telat'       => $hariTelat,
-            'catatan'          => $r->catatan
+            'catatan'          => $r->catatan,
         ]);
 
         foreach ($r->kondisi as $kondisi => $jumlah) {
@@ -107,7 +109,17 @@ class PengembalianController extends Controller
         }
 
         $peminjaman->update(['status' => 'dikembalikan']);
-        $peminjaman->barang->increment('stok', $r->kondisi['baik']);
+        $barang = $peminjaman->barang;
+        $barang->increment('stok', $r->kondisi['baik']);
+
+        // ── Update kondisi barang berdasarkan prioritas terburuk ──────────
+        // rusak > perlu_perbaikan > baik (kondisi tidak diubah jika semua baik)
+        if ($r->kondisi['rusak'] > 0) {
+            $barang->update(['kondisi' => 'rusak']);
+        } elseif ($r->kondisi['perlu_perbaikan'] > 0) {
+            $barang->update(['kondisi' => 'perlu_perbaikan']);
+        }
+        // Jika semua baik → kondisi barang tetap 'baik', tidak perlu update
 
         return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil');
     }
@@ -137,10 +149,10 @@ class PengembalianController extends Controller
             'kondisi.baik'            => 'required|integer|min:0',
             'kondisi.rusak'           => 'required|integer|min:0',
             'kondisi.perlu_perbaikan' => 'required|integer|min:0',
-            'catatan'                 => 'nullable|string'
+            'catatan'                 => 'nullable|string',
         ]);
 
-        $pengembalian->load('peminjaman');
+        $pengembalian->load('peminjaman.barang');
         $total = $r->kondisi['baik'] + $r->kondisi['rusak'] + $r->kondisi['perlu_perbaikan'];
         if ($total != $pengembalian->peminjaman->jumlah) {
             return back()->withErrors(['kondisi' => 'Total harus ' . $pengembalian->peminjaman->jumlah]);
@@ -158,11 +170,10 @@ class PengembalianController extends Controller
         $pengembalian->update([
             'tgl_kembali_real' => $r->tgl_kembali_real,
             'hari_telat'       => $hariTelat,
-            'catatan'          => $r->catatan
+            'catatan'          => $r->catatan,
         ]);
 
         $pengembalian->details()->delete();
-
         foreach ($r->kondisi as $kondisi => $jumlah) {
             if ($jumlah > 0) $pengembalian->details()->create(['kondisi' => $kondisi, 'jumlah' => $jumlah]);
         }
@@ -170,6 +181,15 @@ class PengembalianController extends Controller
         $barang = $pengembalian->peminjaman->barang;
         $barang->decrement('stok', $baikLama);
         $barang->increment('stok', $baikBaru);
+
+        // Update kondisi sesuai data terbaru
+        if ($r->kondisi['rusak'] > 0) {
+            $barang->update(['kondisi' => 'rusak']);
+        } elseif ($r->kondisi['perlu_perbaikan'] > 0) {
+            $barang->update(['kondisi' => 'perlu_perbaikan']);
+        } else {
+            $barang->update(['kondisi' => 'baik']);
+        }
 
         return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian diperbarui');
     }
@@ -193,6 +213,8 @@ class PengembalianController extends Controller
     private function authorizePengembalian($pengembalian)
     {
         $user = Auth::user();
-        if ($user->role == 'petugas' && $pengembalian->peminjaman->barang->bidang_id != $user->bidang_id) abort(403);
+        if ($user->role == 'petugas' && $pengembalian->peminjaman->barang->bidang_id != $user->bidang_id) {
+            abort(403);
+        }
     }
 }
