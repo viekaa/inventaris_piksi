@@ -31,7 +31,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h4 class="card-title mb-1">Data Pengembalian</h4>
+                            <h4 class="card-title-pengembalian mb-1">Data Pengembalian</h4>
                             <p class="card-subtitle">Kelola pengembalian barang inventaris</p>
                         </div>
                         <div class="header-actions">
@@ -60,11 +60,11 @@
                         <table class="table custom-table">
                             <thead>
                                 <tr>
-                                    <th class="col-no">No</th>
+                                    <th class="col-no-pengembalian">No</th>
                                     <th>Barang</th>
                                     <th>Peminjam</th>
                                     <th class="text-center">Jumlah</th>
-                                    <th class="text-center">Tgl Kembali</th>
+                                    <th class="text-center">Tanggal Kembali</th>
                                     <th class="text-center">Keterlambatan</th>
                                     <th class="text-center">Kondisi</th>
                                     <th class="text-center col-aksi">Aksi</th>
@@ -178,9 +178,9 @@
 }
 
 /* ===== HEADER ===== */
-.card-title {
-    font-size: 24px;
-    font-weight: 500;
+.card-title-pengembalian{
+    font-size: 23px;
+    font-weight: 400;
     letter-spacing: -0.5px;
     color: #1a1a1a;
     margin: 0;
@@ -304,7 +304,10 @@
 .custom-table thead tr th:first-child { border-radius: 12px 0 0 0; }
 .custom-table thead tr th:last-child  { border-radius: 0 12px 0 0; }
 
-.col-no   { width: 70px; text-align: center; }
+.col-no-pengembalian{
+    width: 70px;
+    text-align: center;
+ }
 .col-aksi { width: 180px; }
 
 .custom-table tbody tr {
@@ -317,10 +320,10 @@
     transform: scale(1.002);
 }
 .custom-table tbody td {
-    padding: 18px 20px;
+    padding: 10px 20px;
     vertical-align: middle;
     color: #374151;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 /* ===== CELLS ===== */
@@ -353,15 +356,15 @@
     background: #eff6ff;
     color: #1e40af;
     border-radius: 8px;
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 12.5px;
+    font-weight: 500;
 }
 .badge-kondisi {
     display: inline-block;
     padding: 6px 14px;
     border-radius: 8px;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 500;
 }
 .badge-ontime {
     display: inline-flex;
@@ -372,7 +375,7 @@
     color: #2E7D32;
     border-radius: 8px;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 /* ===== KONDISI PILLS ===== */

@@ -138,6 +138,7 @@
 /* ===== TYPOGRAPHY ===== */
 :root {
     --font-primary-petugas: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+     --font-mono-petugas: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
 }
 
 /* ===== CARD PETUGAS ===== */
@@ -155,12 +156,11 @@
 /* ===== HEADER ===== */
 .card-title-petugas {
     font-size: 24px;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.5px;
     color: #1a1a1a;
     margin: 0;
 }
-
 .card-subtitle-petugas {
     font-size: 13px;
     color: #6c757d;
@@ -227,7 +227,7 @@
     color: #fff;
     border: none;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
@@ -259,8 +259,8 @@
 .custom-table-petugas thead tr th {
     padding: 18px 20px;
     color: #fff;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 12.5px;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     border: none;

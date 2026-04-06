@@ -9,13 +9,12 @@ class PerbaikanController extends Controller
 {
     public function index()
     {
-        // 2 query dengan eager load kolom yang diperlukan saja
-        $rusak = Barang::where('kondisi', 'rusak')
+        $perluPerbaikan = Barang::where('kondisi', 'perlu_perbaikan')
             ->with(['kategori:id,nama_kategori', 'bidang:id,nama_bidang', 'lokasi:id,nama_lokasi'])
             ->latest()
             ->get();
 
-        $perluPerbaikan = Barang::where('kondisi', 'perlu_perbaikan')
+        $rusak = Barang::where('kondisi', 'rusak')
             ->with(['kategori:id,nama_kategori', 'bidang:id,nama_bidang', 'lokasi:id,nama_lokasi'])
             ->latest()
             ->get();
@@ -32,12 +31,12 @@ class PerbaikanController extends Controller
         $kondisiLama = $barang->kondisi;
         $kondisiBaru = $r->kondisi;
 
-        // Jika diupdate jadi baik → stok +1
+        // Dari bermasalah → baik: stok bertambah 1 (barang sudah selesai diperbaiki)
         if ($kondisiBaru === 'baik' && $kondisiLama !== 'baik') {
             $barang->increment('stok');
         }
 
-        // Jika dari baik jadi rusak/perlu_perbaikan → stok -1
+        // Dari baik → bermasalah: stok berkurang 1 (barang ditarik dari stok)
         if ($kondisiBaru !== 'baik' && $kondisiLama === 'baik' && $barang->stok > 0) {
             $barang->decrement('stok');
         }
@@ -46,7 +45,8 @@ class PerbaikanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Kondisi barang berhasil diperbarui',
+            'message' => 'Kondisi barang berhasil diperbarui'
+                       . ($kondisiBaru === 'baik' ? ' dan stok bertambah 1.' : '.'),
             'kondisi' => $kondisiBaru,
         ]);
     }

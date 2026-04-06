@@ -81,12 +81,21 @@ class PengembalianController extends Controller
 
         $peminjaman = Peminjaman::with('barang')->findOrFail($r->peminjaman_id);
 
-        if (Auth::user()->role == 'petugas' && $peminjaman->barang->bidang_id != Auth::user()->bidang_id) abort(403);
-        if ($peminjaman->status === 'dikembalikan') return back()->with('error', 'Sudah dikembalikan');
+        if (Auth::user()->role == 'petugas' && $peminjaman->barang->bidang_id != Auth::user()->bidang_id) {
+            abort(403);
+        }
 
-        $total = $r->kondisi['baik'] + $r->kondisi['rusak'] + $r->kondisi['perlu_perbaikan'];
+        if ($peminjaman->status === 'dikembalikan') {
+            return back()->with('error', 'Peminjaman ini sudah dikembalikan.');
+        }
+
+        $jmlBaik      = (int) $r->kondisi['baik'];
+        $jmlRusak     = (int) $r->kondisi['rusak'];
+        $jmlPerbaikan = (int) $r->kondisi['perlu_perbaikan'];
+        $total        = $jmlBaik + $jmlRusak + $jmlPerbaikan;
+
         if ($total != $peminjaman->jumlah) {
-            return back()->withErrors(['kondisi' => 'Total harus ' . $peminjaman->jumlah]);
+            return back()->withErrors(['kondisi' => 'Total kondisi harus sama dengan jumlah dipinjam (' . $peminjaman->jumlah . ').']);
         }
 
         $hariTelat = 0;
@@ -102,26 +111,34 @@ class PengembalianController extends Controller
             'catatan'          => $r->catatan,
         ]);
 
-        foreach ($r->kondisi as $kondisi => $jumlah) {
+        foreach (['baik' => $jmlBaik, 'rusak' => $jmlRusak, 'perlu_perbaikan' => $jmlPerbaikan] as $kondisi => $jumlah) {
             if ($jumlah > 0) {
                 $pengembalian->details()->create(['kondisi' => $kondisi, 'jumlah' => $jumlah]);
             }
         }
 
         $peminjaman->update(['status' => 'dikembalikan']);
+
         $barang = $peminjaman->barang;
-        $barang->increment('stok', $r->kondisi['baik']);
 
-        // ── Update kondisi barang berdasarkan prioritas terburuk ──────────
-        // rusak > perlu_perbaikan > baik (kondisi tidak diubah jika semua baik)
-        if ($r->kondisi['rusak'] > 0) {
-            $barang->update(['kondisi' => 'rusak']);
-        } elseif ($r->kondisi['perlu_perbaikan'] > 0) {
-            $barang->update(['kondisi' => 'perlu_perbaikan']);
+        // Stok hanya bertambah dari barang yang kembali dalam kondisi BAIK
+        if ($jmlBaik > 0) {
+            $barang->increment('stok', $jmlBaik);
         }
-        // Jika semua baik → kondisi barang tetap 'baik', tidak perlu update
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil');
+        // Kondisi barang diupdate berdasarkan prioritas terburuk:
+        // rusak > perlu_perbaikan > baik
+        // Barang bermasalah otomatis muncul di halaman perbaikan
+        if ($jmlRusak > 0) {
+            $barang->update(['kondisi' => 'rusak']);
+        } elseif ($jmlPerbaikan > 0) {
+            $barang->update(['kondisi' => 'perlu_perbaikan']);
+        } else {
+            // Semua kembali baik → pastikan kondisi barang = baik
+            $barang->update(['kondisi' => 'baik']);
+        }
+
+        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil dicatat.');
     }
 
     public function show($id)
@@ -153,9 +170,14 @@ class PengembalianController extends Controller
         ]);
 
         $pengembalian->load('peminjaman.barang');
-        $total = $r->kondisi['baik'] + $r->kondisi['rusak'] + $r->kondisi['perlu_perbaikan'];
+
+        $jmlBaik      = (int) $r->kondisi['baik'];
+        $jmlRusak     = (int) $r->kondisi['rusak'];
+        $jmlPerbaikan = (int) $r->kondisi['perlu_perbaikan'];
+        $total        = $jmlBaik + $jmlRusak + $jmlPerbaikan;
+
         if ($total != $pengembalian->peminjaman->jumlah) {
-            return back()->withErrors(['kondisi' => 'Total harus ' . $pengembalian->peminjaman->jumlah]);
+            return back()->withErrors(['kondisi' => 'Total kondisi harus sama dengan jumlah dipinjam (' . $pengembalian->peminjaman->jumlah . ').']);
         }
 
         $hariTelat = 0;
@@ -164,8 +186,8 @@ class PengembalianController extends Controller
                                 ->diffInDays(Carbon::parse($r->tgl_kembali_real));
         }
 
-        $baikLama = $pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
-        $baikBaru = $r->kondisi['baik'];
+        // Simpan jumlah baik lama sebelum detail dihapus untuk koreksi stok
+        $baikLama = (int) ($pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0);
 
         $pengembalian->update([
             'tgl_kembali_real' => $r->tgl_kembali_real,
@@ -174,24 +196,28 @@ class PengembalianController extends Controller
         ]);
 
         $pengembalian->details()->delete();
-        foreach ($r->kondisi as $kondisi => $jumlah) {
-            if ($jumlah > 0) $pengembalian->details()->create(['kondisi' => $kondisi, 'jumlah' => $jumlah]);
+        foreach (['baik' => $jmlBaik, 'rusak' => $jmlRusak, 'perlu_perbaikan' => $jmlPerbaikan] as $kondisi => $jumlah) {
+            if ($jumlah > 0) {
+                $pengembalian->details()->create(['kondisi' => $kondisi, 'jumlah' => $jumlah]);
+            }
         }
 
         $barang = $pengembalian->peminjaman->barang;
-        $barang->decrement('stok', $baikLama);
-        $barang->increment('stok', $baikBaru);
+
+        // Koreksi stok: batalkan stok lama, terapkan stok baru
+        if ($baikLama > 0) $barang->decrement('stok', $baikLama);
+        if ($jmlBaik  > 0) $barang->increment('stok', $jmlBaik);
 
         // Update kondisi sesuai data terbaru
-        if ($r->kondisi['rusak'] > 0) {
+        if ($jmlRusak > 0) {
             $barang->update(['kondisi' => 'rusak']);
-        } elseif ($r->kondisi['perlu_perbaikan'] > 0) {
+        } elseif ($jmlPerbaikan > 0) {
             $barang->update(['kondisi' => 'perlu_perbaikan']);
         } else {
             $barang->update(['kondisi' => 'baik']);
         }
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian diperbarui');
+        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil diperbarui.');
     }
 
     public function destroy(Pengembalian $pengembalian)
@@ -199,18 +225,30 @@ class PengembalianController extends Controller
         if (Auth::user()->role == 'admin') abort(403);
         $this->authorizePengembalian($pengembalian);
 
-        $barang = $pengembalian->peminjaman->barang;
-        $baik   = $pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0;
+        $pengembalian->load(['peminjaman.barang', 'details']);
 
-        $barang->decrement('stok', $baik);
+        $barang   = $pengembalian->peminjaman->barang;
+        $baikLama = (int) ($pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0);
+
+        // Batalkan stok yang sudah ditambah saat pengembalian dicatat
+        if ($baikLama > 0) {
+            $barang->decrement('stok', $baikLama);
+        }
+
+        // Kembalikan status peminjaman → dipinjam
         $pengembalian->peminjaman->update(['status' => 'dipinjam']);
+
+        // Reset kondisi barang ke baik karena pengembalian dibatalkan
+        // (barang dianggap masih berada di tangan peminjam)
+        $barang->update(['kondisi' => 'baik']);
+
         $pengembalian->details()->delete();
         $pengembalian->delete();
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian dihapus');
+        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil dihapus.');
     }
 
-    private function authorizePengembalian($pengembalian)
+    private function authorizePengembalian($pengembalian): void
     {
         $user = Auth::user();
         if ($user->role == 'petugas' && $pengembalian->peminjaman->barang->bidang_id != $user->bidang_id) {

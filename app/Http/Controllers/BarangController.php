@@ -8,6 +8,7 @@ use App\Models\Lokasi;
 use App\Models\Bidang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class BarangController extends Controller
 {
@@ -98,8 +99,8 @@ class BarangController extends Controller
             'stok'         => $validated['stok'],
             'kondisi'      => $validated['kondisi']
         ]);
-
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
+        Alert::success('Berhasil', 'Barang berhasil di tambahkan!');
+        return redirect()->route('barang.index');
     }
 
     public function show(Barang $barang)
@@ -159,8 +160,8 @@ class BarangController extends Controller
         }
 
         $barang->update($updateData);
-
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui!');
+        Alert::success('Berhasil', 'Barang berhasil diperbarui!');
+        return redirect()->route('barang.index');
     }
 
     public function destroy(Barang $barang)
@@ -169,8 +170,8 @@ class BarangController extends Controller
 
         $nama = $barang->nama_barang;
         $barang->delete();
-
-        return redirect()->route('barang.index')->with('success', "Barang '{$nama}' berhasil dihapus!");
+        Alert::success('Berhasil', 'Barang berhasil dihapus!');
+        return redirect()->route('barang.index');
     }
 
     private function authorizeBarang($barang)

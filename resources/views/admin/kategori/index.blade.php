@@ -125,7 +125,7 @@ body {
 /* ===== HEADER KATEGORI ===== */
 .card-title-kategori {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 400;
     letter-spacing: -0.5px;
     color: #1a1a1a;
     margin: 0;
