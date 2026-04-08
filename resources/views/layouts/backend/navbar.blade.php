@@ -8,10 +8,8 @@
             <div class="navbar-brand">
                 <a href="{{ route('admin.dashboard') }}" class="logo-link">
                     <div class="logo-stack">
-                        <div class="logo-wordmark">
-                            <span class="logo-icon-text">In</span><span class="logo-main-text">piksi</span>
-                        </div>
-                        <div class="logo-sub">inventaris piksi</div>
+                        <img src="{{ asset('storage/images/logo_crop.png') }}" alt="Inpiksi Logo" class="logo-img">
+                    
                     </div>
                 </a>
             </div>
@@ -51,15 +49,15 @@
 }
 
 .top-navbar .navbar-header {
-    height: 72px !important;
+    height: 110px !important;
     padding: 0 14px !important;
 }
 
 .navbar-brand {
     padding: 0 !important;
     margin: 0 !important;
-    margin-top: 20px !important;
-    height: 72px !important;
+    margin-top: 20px !important;  /* turun sedikit dari atas */
+    height: 110px !important;
     display: flex !important;
     align-items: center !important;
 }
@@ -73,47 +71,27 @@
 .logo-stack {
     display: flex;
     flex-direction: column;
+    align-items: center;
     line-height: 1;
-    gap: 0;
+    gap: 0;          /* rapat banget */
 }
 
-.logo-wordmark {
-    display: inline-flex;
-    align-items: baseline;
-    line-height: 1;
-}
-
-.logo-icon-text {
-    font-family: 'Syne', sans-serif;
-    font-size: 36px;
-    font-weight: 900;
-    font-style: italic;
-    color: #f5b731;
-    letter-spacing: -2px;
-    text-shadow: none;
-}
-
-.logo-main-text {
-    font-family: 'Syne', sans-serif;
-    font-size: 36px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #9333ea 0%, #c084fc 50%, #e879f9 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -2px;
-    filter: none;
+.logo-img {
+    height: 60px;    /* lebih besar */
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 2px;
 }
 
 .logo-sub {
     font-family: 'Syne', sans-serif;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 800;
     color: #a78bfa;
     letter-spacing: 3px;
     text-transform: uppercase;
-    padding-left: 3px;
-    margin-top: 2px;
+    margin-top: 0;
     text-shadow: none;
+    white-space: nowrap;
 }
 </style>
