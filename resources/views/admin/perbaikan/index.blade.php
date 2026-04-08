@@ -61,8 +61,8 @@
                                                 <option value="baik">Sudah Baik</option>
                                                 <option value="rusak">Rusak</option>
                                             </select>
-                                            <button class="btn-update btn-update-perbaikan" onclick="updateKondisi(this)">
-                                                <i class="fas fa-save"></i> Simpan
+                                             <button class="btn btn-circle btn-success btn-sm btn-update-perbaikan" onclick="updateKondisi(this)">
+                                                <i class=" fas fa-check"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -141,8 +141,8 @@
                                                 <option value="baik">Sudah Baik</option>
                                                 <option value="perlu_perbaikan">Perlu Perbaikan</option>
                                             </select>
-                                            <button class="btn-update btn-update-rusak" onclick="updateKondisi(this)">
-                                                <i class="fas fa-save"></i> Simpan
+                                            <button class="btn btn-circle btn-success btn-sm btn-update-rusak" onclick="updateKondisi(this)">
+                                                <i class=" fas fa-check"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -367,10 +367,9 @@
     white-space: nowrap;
     color: #fff;
 }
-.btn-update-perbaikan { background: #F57F17; }
+/* .btn-update-perbaikan { background: #F57F17; }
 .btn-update-perbaikan:hover { background: #e65100; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(245,127,23,0.35); }
-.btn-update-rusak { background: #C62828; }
-.btn-update-rusak:hover { background: #b71c1c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(198,40,40,0.35); }
+.btn-update-rusak:hover { background: #b71c1c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(198,40,40,0.35); } */
 
 .empty-state {
     display: flex;

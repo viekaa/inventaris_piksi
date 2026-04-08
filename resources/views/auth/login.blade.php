@@ -21,6 +21,46 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
+<style>
+    .logo-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+.logo-inventaris {
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7c3aed;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    padding-left: 3px; /* supaya sejajar visual sama piksi */
+}
+
+.logo-piksi {
+    font-family: 'Righteous', cursive;
+    font-size: 36px;
+    background: linear-gradient(135deg, #6d28d9 0%, #a855f7 45%, #f5b731 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+.logo-text-group {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 2px;
+}
+.auth-card {
+    width: 350px;
+    height: 450px; /* bebas mau 400, 500, dll */
+    border-radius: 10px;
+}
+
+</style>
 @if(session('error'))
 <script>
     Swal.fire({
@@ -51,31 +91,31 @@
             style="background:url({{ asset('assets/images/big/auth-bg.jpg') }}) no-repeat center center;">
             <div class="auth-box row">
                 <center>
-                <div class="col-lg-5 col-md-7 bg-white">
+                <div class="auth-card  bg-white">
                     <div class="p-3">
                         <div class="text-center">
-                            <img src="{{asset('assets/images/big/icon.png')}}" alt="wrapkit">
+                            <img src="{{ asset('storage/images/logo_crop.png') }}" alt="Inpiksi Logo" class="logo-img">
                         </div>
-                        <h2 class="mt-3 text-center">Sign In</h2>
+                        <br><h3>Selamat Datang!</h3>
                         <form method="POST" action="{{ route('login') }}" class="mt-4">
                          @csrf
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <div class="form-group">
+                                    <div class="form-group text-left">
                                         <label class="text-dark" for="email">Email</label>
                                         <input class="form-control" name="email" type="text"
                                             placeholder="enter your email">
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label class="text-dark" for="password">Password</label>
+                                    <div class="form-group text-left">
+                                        <label class="text-dark" for="password">Kata sandi</label>
                                         <input class="form-control" name="password" type="password"
                                             placeholder="enter your password">
                                     </div>
                                 </div>
-                                <div class="col-lg-12 text-center">
-                                    <button type="submit" class="btn btn-block btn-dark">Sign In</button>
+                                <div class="col-lg-12 mt-4 text-center">
+                                    <button type="submit" class="btn btn-block btn-dark">Masuk</button>
                                 </div>
 
                             </div>

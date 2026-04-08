@@ -9,7 +9,10 @@
                 <a href="{{ route('admin.dashboard') }}" class="logo-link">
                     <div class="logo-stack">
                         <img src="{{ asset('storage/images/logo_crop.png') }}" alt="Inpiksi Logo" class="logo-img">
-                    
+                        <div class="logo-text-group">
+                            <span class="logo-inventaris">inventaris</span>
+                            <span class="logo-piksi">piksi</span>
+                        </div>
                     </div>
                 </a>
             </div>
@@ -28,7 +31,7 @@
 </header>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@600;700&display=swap');
 
 .topbar,
 .topbar[data-navbarbg="skin6"] {
@@ -56,7 +59,7 @@
 .navbar-brand {
     padding: 0 !important;
     margin: 0 !important;
-    margin-top: 20px !important;  /* turun sedikit dari atas */
+    margin-top: 20px !important;
     height: 110px !important;
     display: flex !important;
     align-items: center !important;
@@ -70,28 +73,43 @@
 
 .logo-stack {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    line-height: 1;
-    gap: 0;          /* rapat banget */
+    gap: 10px;
 }
 
 .logo-img {
-    height: 60px;    /* lebih besar */
+    height: 60px;
     width: auto;
     object-fit: contain;
-    margin-bottom: 2px;
+    flex-shrink: 0;
 }
 
-.logo-sub {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
-    font-weight: 800;
-    color: #a78bfa;
-    letter-spacing: 3px;
+.logo-text-group {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 2px;
+}
+
+.logo-inventaris {
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7c3aed;
+    letter-spacing: 5px;
     text-transform: uppercase;
-    margin-top: 0;
-    text-shadow: none;
-    white-space: nowrap;
+    padding-left: 3px; /* supaya sejajar visual sama piksi */
+}
+
+.logo-piksi {
+    font-family: 'Righteous', cursive;
+    font-size: 36px;
+    background: linear-gradient(135deg, #6d28d9 0%, #a855f7 45%, #f5b731 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    line-height: 1;
 }
 </style>

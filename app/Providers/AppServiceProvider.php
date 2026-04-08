@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Barang;
+  use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +22,7 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('jumlahPerhatian', $jumlahPerhatian);
         });
-    }
+   Carbon::setLocale('id');
 }
+    }
+
