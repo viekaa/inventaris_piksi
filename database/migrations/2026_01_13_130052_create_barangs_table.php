@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('jumlah_total');
             $table->integer('stok');
             $table->enum('kondisi', ['baik', 'rusak','perlu_perbaikan'])->default('baik');
+            $table->string('foto')->nullable();
             $table->timestamps();
         });
     }

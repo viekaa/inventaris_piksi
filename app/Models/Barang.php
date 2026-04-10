@@ -14,6 +14,7 @@ class Barang extends Model
         'jumlah_total',
         'stok',
         'kondisi',  // baik | perlu_perbaikan | rusak
+        'foto'
     ];
 
     // ── Relasi ───────────────────────────────────────────────────────

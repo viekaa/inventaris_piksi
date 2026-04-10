@@ -8,6 +8,7 @@ use App\Models\Lokasi;
 use App\Models\Bidang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage; // Penting untuk hapus file
 use RealRashid\SweetAlert\Facades\Alert;
 
 class BarangController extends Controller
@@ -81,7 +82,8 @@ class BarangController extends Controller
             'lokasi_id'    => 'required|exists:lokasis,id',
             'jumlah_total' => 'required|integer|min:0',
             'stok'         => 'required|integer|min:0',
-            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan'
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi foto
         ];
 
         if ($user->role == 'admin') {
@@ -90,15 +92,15 @@ class BarangController extends Controller
 
         $validated = $r->validate($rules);
 
-        Barang::create([
-            'nama_barang'  => $validated['nama_barang'],
-            'kategori_id'  => $validated['kategori_id'],
-            'lokasi_id'    => $validated['lokasi_id'],
-            'bidang_id'    => $user->role == 'admin' ? $validated['bidang_id'] : $user->bidang_id,
-            'jumlah_total' => $validated['jumlah_total'],
-            'stok'         => $validated['stok'],
-            'kondisi'      => $validated['kondisi']
-        ]);
+        // Handle Upload Foto
+        if ($r->hasFile('foto')) {
+            $validated['foto'] = $r->file('foto')->store('barang', 'public');
+        }
+
+        $validated['bidang_id'] = $user->role == 'admin' ? $validated['bidang_id'] : $user->bidang_id;
+
+        Barang::create($validated);
+
         Alert::success('Berhasil', 'Barang berhasil di tambahkan!');
         return redirect()->route('barang.index');
     }
@@ -137,7 +139,8 @@ class BarangController extends Controller
             'lokasi_id'    => 'required|exists:lokasis,id',
             'jumlah_total' => 'required|integer|min:0',
             'stok'         => 'required|integer|min:0|lte:jumlah_total',
-            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan'
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ];
 
         if ($user->role == 'admin') {
@@ -146,20 +149,22 @@ class BarangController extends Controller
 
         $validated = $r->validate($rules);
 
-        $updateData = [
-            'nama_barang'  => $validated['nama_barang'],
-            'kategori_id'  => $validated['kategori_id'],
-            'lokasi_id'    => $validated['lokasi_id'],
-            'jumlah_total' => $validated['jumlah_total'],
-            'stok'         => $validated['stok'],
-            'kondisi'      => $validated['kondisi']
-        ];
-
-        if ($user->role == 'admin' && isset($validated['bidang_id'])) {
-            $updateData['bidang_id'] = $validated['bidang_id'];
+        // Handle Update Foto
+        if ($r->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($barang->foto) {
+                Storage::disk('public')->delete($barang->foto);
+            }
+            // Simpan foto baru
+            $validated['foto'] = $r->file('foto')->store('barang', 'public');
         }
 
-        $barang->update($updateData);
+        if ($user->role != 'admin') {
+            unset($validated['bidang_id']); // Pastikan bidang_id petugas tidak berubah sembarangan
+        }
+
+        $barang->update($validated);
+
         Alert::success('Berhasil', 'Barang berhasil diperbarui!');
         return redirect()->route('barang.index');
     }
@@ -168,7 +173,11 @@ class BarangController extends Controller
     {
         $this->authorizeBarang($barang);
 
-        $nama = $barang->nama_barang;
+        // Hapus file fisik foto dari storage sebelum hapus data
+        if ($barang->foto) {
+            Storage::disk('public')->delete($barang->foto);
+        }
+
         $barang->delete();
         Alert::success('Berhasil', 'Barang berhasil dihapus!');
         return redirect()->route('barang.index');
