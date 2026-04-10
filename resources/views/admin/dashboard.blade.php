@@ -93,7 +93,7 @@
         </div>
     </div>
 
-    {{-- ── BARIS 2: KONDISI | STATISTIK | AKTIVITAS (Tinggi Disetarakan) ── --}}
+    {{-- ── BARIS 2: KONDISI | STATISTIK | AKTIVITAS ──────────────── --}}
     <div class="row">
         <div class="col-lg-4 col-md-12 d-flex align-items-stretch">
             <div class="card w-100">
@@ -171,25 +171,25 @@
         </div>
     </div>
 
-    {{-- ── BARIS 3: CHART BESAR & RINGKASAN (Tinggi Disetarakan) ────── --}}
+    {{-- ── BARIS 3: PEMINJAMAN | RINGKASAN | STOK MENIPIS (SEJAJAR 3) ── --}}
     <div class="row">
-        <div class="col-md-6 col-lg-8 d-flex align-items-stretch">
+        <div class="col-lg-4 col-md-12 d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-flex align-items-start">
-                        <h4 class="card-title mb-0">Peminjaman Per Bidang</h4>
+                        <h4 class="card-title mb-0">Peminjaman</h4>
                         <div class="ml-auto">
                             <a class="text-muted" href="{{ route('admin.peminjaman.index') }}"><i data-feather="external-link"></i></a>
                         </div>
                     </div>
-                    <div class="mt-4" style="height: 350px;">
+                    <div class="mt-4" style="height: 300px;">
                         <canvas id="peminjamanChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+        <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <h4 class="card-title">Ringkasan Kondisi</h4>
@@ -200,11 +200,10 @@
                         $grandTotal     = max($totalBaik + $totalPerbaikan + $totalRusak, 1);
                     @endphp
                     <div class="mt-4 activity">
-                        {{-- Ringkasan Item --}}
                         <div class="d-flex align-items-start border-left-line pb-4">
                             <div class="btn btn-success btn-circle"><i data-feather="check-circle"></i></div>
                             <div class="ml-3 w-100">
-                                <h5 class="text-dark font-weight-medium mb-1">Kondisi Baik</h5>
+                                <h5 class="text-dark font-weight-medium mb-1">Baik</h5>
                                 <div class="progress mb-1" style="height:5px;"><div class="progress-bar bg-success" style="width:{{ round($totalBaik/$grandTotal*100) }}%"></div></div>
                                 <small class="text-muted">{{ $totalBaik }} barang ({{ round($totalBaik/$grandTotal*100) }}%)</small>
                             </div>
@@ -212,9 +211,9 @@
                         <div class="d-flex align-items-start border-left-line pb-4">
                             <div class="btn btn-warning btn-circle"><i data-feather="tool"></i></div>
                             <div class="ml-3 w-100">
-                                <h5 class="text-dark font-weight-medium mb-1">Perlu Perbaikan</h5>
+                                <h5 class="text-dark font-weight-medium mb-1">Perbaikan</h5>
                                 <div class="progress mb-1" style="height:5px;"><div class="progress-bar bg-warning" style="width:{{ round($totalPerbaikan/$grandTotal*100) }}%"></div></div>
-                                <small class="text-muted">{{ $totalPerbaikan }} barang ({{ round($totalPerbaikan/$grandTotal*100) }}%)</small>
+                                <small class="text-muted">{{ $totalPerbaikan }} barang</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-start border-left-line">
@@ -222,41 +221,39 @@
                             <div class="ml-3 w-100">
                                 <h5 class="text-dark font-weight-medium mb-1">Rusak</h5>
                                 <div class="progress mb-1" style="height:5px;"><div class="progress-bar bg-danger" style="width:{{ round($totalRusak/$grandTotal*100) }}%"></div></div>
-                                <small class="text-muted">{{ $totalRusak }} barang ({{ round($totalRusak/$grandTotal*100) }}%)</small>
+                                <small class="text-muted">{{ $totalRusak }} barang</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- ── BARIS 4: STOK MENIPIS (FULL WIDTH) ────────────────────── --}}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
+        <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
+            <div class="card w-100">
                 <div class="card-body">
                     <h4 class="card-title">Barang Stok Menipis</h4>
-                    <div class="table-responsive">
+                    <div class="table-responsive mt-2">
                         <table class="table no-wrap v-middle mb-0">
                             <thead>
                                 <tr class="border-0">
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Nama Barang</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Bidang</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted text-center">Stok</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted text-center">Status</th>
+                                    <th class="border-0 font-13 font-weight-medium text-muted">Barang</th>
+                                    <th class="border-0 font-13 font-weight-medium text-muted text-center">Stok</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($barangHabis as $item)
                                 <tr>
-                                    <td class="border-top-0 py-3 font-weight-medium text-dark">{{ $item->nama_barang }}</td>
-                                    <td class="border-top-0 py-3 text-muted">{{ $item->nama_bidang ?? '-' }}</td>
-                                    <td class="border-top-0 py-3 text-center"><span class="badge bg-warning text-white">{{ $item->stok }}</span></td>
-                                    <td class="border-top-0 py-3 text-center"><i class="fa fa-circle text-danger font-12"></i></td>
+                                    <td class="border-top-0 py-2">
+                                        <div class="font-weight-medium text-dark font-14">{{ Str::limit($item->nama_barang, 20) }}</div>
+                                        <small class="text-muted">{{ $item->nama_bidang ?? '-' }}</small>
+                                    </td>
+                                    <td class="border-top-0 py-2 text-center">
+                                        <span class="badge bg-danger text-white">{{ $item->stok }}</span>
+                                    </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="4" class="text-center py-3 text-muted">Aman! Tidak ada stok menipis.</td></tr>
+                                <tr><td colspan="2" class="text-center py-4 text-muted font-14">Aman! Stok tersedia.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
