@@ -20,7 +20,7 @@
                     </div>
 
                     <!-- Form -->
-                    <form action="{{ route('barang.store') }}" method="POST" class="custom-form">
+                  <form action="{{ route('barang.store') }}" method="POST" class="custom-form" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
@@ -214,7 +214,32 @@
                                     @enderror
                                 </div>
                             </div>
+                        <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label class="form-label">
+                                Foto Barang
+                                <small class="text-muted">(Opsional)</small>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-image input-icon"></i>
+                                <input type="file"
+                                    name="foto"
+                                    class="form-control-custom @error('foto') is-invalid @enderror"
+                                    accept="image/*"
+                                    onchange="previewImage(this)">
+                            </div>
+                            <small class="form-text">Format: JPG, JPEG, PNG (Maks. 2MB)</small>
 
+                            <div id="image-preview-container" class="mt-3" style="display: none;">
+                                <img id="img-preview" src="#" alt="Preview" style="max-width: 200px; border-radius: 10px; border: 2px solid var(--color-gray-200);">
+                                <p class="text-muted small mt-1">Preview Gambar</p>
+                            </div>
+
+                            @error('foto')
+                                <div class="error-message">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                         </div>
 
                         <!-- Form Actions -->

@@ -45,11 +45,13 @@ class PetugasController extends Controller
     }
 
     public function edit(User $user)
-    {
-        $bidang = Bidang::all();
-        return view('admin.pengguna.edit', compact('user', 'bidang'));
-    }
-
+{
+    $bidang = Bidang::all();
+    return view('admin.pengguna.edit', [
+        'petugas' => $user,
+        'bidang'  => $bidang,
+    ]);
+}
     public function update(Request $r, User $user)
     {
         $r->validate([

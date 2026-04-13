@@ -9,8 +9,10 @@ class LokasiSeeder extends Seeder
 {
     public function run(): void
     {
-        Lokasi::create(['nama_lokasi'=>'Lab CMC']);
-        Lokasi::create(['nama_lokasi'=>'Lab CBT']);
-        Lokasi::create(['nama_lokasi'=>'Lab 302']);
+        Lokasi::create(['nama_lokasi'=>'Gudang Penyimpanan']);
+        Lokasi::create(['nama_lokasi'=>'Hardware']);
+        Lokasi::create(['nama_lokasi'=>'Front Office']);
+        Lokasi::create(['nama_lokasi'=>'Akademik']);
+        Lokasi::create(['nama_lokasi'=>'Umum']);
     }
 }

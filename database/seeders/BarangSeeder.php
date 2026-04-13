@@ -18,10 +18,11 @@ class BarangSeeder extends Seeder
         $atk          = Kategori::where('nama_kategori','ATK')->first();
 
         // Lokasi
-        $gudang = Lokasi::firstOrCreate(['nama_lokasi' => 'Gudang Peminjaman']);
-        $lab    = Lokasi::firstOrCreate(['nama_lokasi' => 'Lab Komputer']);
-        $kelas  = Lokasi::firstOrCreate(['nama_lokasi' => 'Ruang Kelas']);
-        $kantor = Lokasi::firstOrCreate(['nama_lokasi' => 'Kantor']);
+        $gudang = Lokasi::firstOrCreate(['nama_lokasi' => 'Gudang Penyimpanan']);
+        $hw     = Lokasi::firstOrCreate(['nama_lokasi' => 'Hardware']);
+        $fo     = Lokasi::firstOrCreate(['nama_lokasi' => 'Front Office']);
+        $kantor = Lokasi::firstOrCreate(['nama_lokasi' => 'Akademik']);
+        $vip    = Lokasi::firstOrCreate(['nama_lokasi' => 'Umum']);
 
         $bidangs = Bidang::all();
 
@@ -31,31 +32,33 @@ class BarangSeeder extends Seeder
 
                 // ================= UMUM =================
                 'Umum' => [
-                    ['nama' => 'Laptop Pinjaman', 'kategori' => $hardware, 'lokasi' => $gudang, 'stok' => 8],
-                    ['nama' => 'LCD Proyektor',   'kategori' => $hardware, 'lokasi' => $gudang, 'stok' => 6],
-                    ['nama' => 'Tripod Kamera',   'kategori' => $perlengkapan, 'lokasi' => $gudang, 'stok' => 10],
+                    ['nama' => 'Laptop Pinjaman', 'kategori' => $hardware, 'lokasi' => $gudang, 'stok' => 10, 'foto' => 'barang/laptop-pinjaman.png'],
+                    ['nama' => 'LCD Proyektor',   'kategori' => $hardware, 'lokasi' => $gudang, 'stok' => 8, 'foto' => 'barang/lcd-proyektor.jpg'],
+                    ['nama' => 'Tripod Kamera',   'kategori' => $perlengkapan, 'lokasi' => $gudang, 'stok' => 6, 'foto' => 'barang/tripod-kamera.png'],
+                    ['nama' => 'Kamera',          'kategori' => $hardware, 'lokasi' => $hw, 'stok' => 5, 'foto' => 'barang/kamera.jpg'],
+                    ['nama' => 'Speaker Bluetooth', 'kategori' => $hardware, 'lokasi' => $hw, 'stok' => 12, 'foto' => 'barang/speaker.jpg'],
                 ],
 
                 // ================= AKADEMIK =================
                 'Akademik' => [
-                    ['nama' => 'Tablet Belajar',    'kategori' => $hardware, 'lokasi' => $lab,   'stok' => 15],
-                    ['nama' => 'Pointer Presenter','kategori' => $hardware, 'lokasi' => $kelas, 'stok' => 20],
-                    ['nama' => 'Whiteboard Portable','kategori'=> $perlengkapan,'lokasi'=> $kelas,'stok' => 10],
+                    ['nama' => 'Tablet Belajar',      'kategori' => $hardware, 'lokasi' => $kantor, 'stok' => 7, 'foto' => 'barang/tablet-belajar.png'],
+                    ['nama' => 'Pointer Presenter',   'kategori' => $hardware, 'lokasi' => $kantor, 'stok' => 13, 'foto' => 'barang/pointer-presenter.jpg'],
+                    ['nama' => 'Whiteboard Portable', 'kategori' => $perlengkapan, 'lokasi' => $kantor, 'stok' => 5, 'foto' => 'barang/whiteboard.jpg'],
+                    ['nama' => 'Spidol Whiteboard',   'kategori' => $atk, 'lokasi' => $kantor, 'stok' => 50, 'foto' => 'barang/spidol.png'],
                 ],
 
                 // ================= KEUANGAN =================
                 'Keuangan' => [
-                    ['nama' => 'Scanner Dokumen',  'kategori' => $hardware, 'lokasi' => $kantor, 'stok' => 4],
-                    ['nama' => 'Kalkulator Ilmiah','kategori' => $hardware, 'lokasi' => $kantor, 'stok' => 15],
-                    ['nama' => 'Map Arsip',        'kategori' => $perlengkapan, 'lokasi' => $kantor, 'stok' => 30],
+                    ['nama' => 'Scanner Dokumen',   'kategori' => $hardware, 'lokasi' => $fo, 'stok' => 4, 'foto' => 'barang/scanner-dokumen.png'],
+                    ['nama' => 'Kalkulator Ilmiah', 'kategori' => $hardware, 'lokasi' => $fo, 'stok' => 8, 'foto' => 'barang/kalkulator-ilmiah.jpg'],
+                    ['nama' => 'Map Arsip',         'kategori' => $perlengkapan, 'lokasi' => $fo, 'stok' => 30, 'foto' => 'barang/map-arsip.png'],
                 ],
 
                 // ================= KEMAHASISWAAN =================
                 'Kemahasiswaan' => [
-                    ['nama' => 'Seragam Formal Hitam Putih','kategori' => $perlengkapan,'lokasi' => $gudang,'stok' => 120],
-                    ['nama' => 'Toga Wisuda',              'kategori' => $perlengkapan,'lokasi' => $gudang,'stok' => 60],
-                    ['nama' => 'ID Card Panitia',          'kategori' => $perlengkapan,'lokasi' => $gudang,'stok' => 200],
-                    ['nama' => 'Badge & Pin Kegiatan',     'kategori' => $atk,'lokasi' => $gudang,'stok' => 300],
+                    ['nama' => 'Seragam Taruna',   'kategori' => $perlengkapan, 'lokasi' => $gudang, 'stok' => 300, 'foto' => 'barang/seragam1.png'],
+                    ['nama' => 'Stempel Piksi',    'kategori' => $perlengkapan, 'lokasi' => $gudang, 'stok' => 10, 'foto' => 'barang/stempel.jpg'],
+                    ['nama' => 'Printer Epson',    'kategori' => $hardware, 'lokasi' => $gudang, 'stok' => 6, 'foto' => 'barang/printer.jpg'],
                 ],
 
                 default => []
@@ -70,9 +73,10 @@ class BarangSeeder extends Seeder
                     [
                         'kategori_id'   => $item['kategori']->id,
                         'lokasi_id'     => $item['lokasi']->id,
-                        'jumlah_total' => $item['stok'],
-                        'stok'         => $item['stok'],
-                        'kondisi'      => 'baik'
+                        'jumlah_total'  => $item['stok'],
+                        'stok'          => $item['stok'],
+                        'kondisi'       => 'baik',
+                        'foto'          => $item['foto'] ?? null
                     ]
                 );
             }

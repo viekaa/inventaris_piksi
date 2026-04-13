@@ -7,199 +7,155 @@
     <div class="row">
         <div class="col-lg-12">
 
-            <!-- Detail Card -->
-            <div class="card custom-card">
+            <div class="card detail-card">
                 <div class="card-body p-4">
 
-                    <!-- Header -->
+                    {{-- ===== HEADER ===== --}}
                     <div class="detail-header">
                         <div>
                             <h4 class="detail-title">Detail Barang</h4>
                             <p class="detail-subtitle">Informasi lengkap tentang barang</p>
                         </div>
-                        <div class="header-badge">
-                            @php
-                                $badge = match($barang->kondisi) {
-                                    'baik'            => ['bg' => '#E8F8F0', 'text' => '#2E7D32', 'icon' => 'check-circle', 'label' => 'Baik'],
-                                    'perlu_perbaikan' => ['bg' => '#FFF8E1', 'text' => '#F9A825', 'icon' => 'exclamation-circle', 'label' => 'Perlu Perbaikan'],
-                                    'rusak'           => ['bg' => '#FDECEA', 'text' => '#C62828', 'icon' => 'times-circle', 'label' => 'Rusak'],
-                                    default           => ['bg' => '#ECEFF1', 'text' => '#546E7A', 'icon' => 'info-circle', 'label' => ucfirst($barang->kondisi)],
-                                };
-                            @endphp
-                            <span class="status-badge" style="background: {{ $badge['bg'] }}; color: {{ $badge['text'] }};">
-                                <i class="fas fa-{{ $badge['icon'] }}"></i>
-                                {{ $badge['label'] }}
-                            </span>
+                        @php
+                            $badge = match($barang->kondisi) {
+                                'baik'            => ['bg' => '#edf7f0', 'border' => '#b8e6c8', 'text' => '#1e7e3e', 'icon' => 'check-circle',      'label' => 'Baik'],
+                                'perlu_perbaikan' => ['bg' => '#fff8e1', 'border' => '#ffe082', 'text' => '#e65100', 'icon' => 'exclamation-circle', 'label' => 'Perlu Perbaikan'],
+                                'rusak'           => ['bg' => '#fdecea', 'border' => '#f5a8a8', 'text' => '#c62828', 'icon' => 'times-circle',       'label' => 'Rusak'],
+                                default           => ['bg' => '#eceff1', 'border' => '#cfd8dc', 'text' => '#546e7a', 'icon' => 'info-circle',        'label' => ucfirst($barang->kondisi)],
+                            };
+                        @endphp
+                        <span class="status-badge" style="background:{{ $badge['bg'] }};color:{{ $badge['text'] }};border-color:{{ $badge['border'] }};">
+                            <i class="fas fa-{{ $badge['icon'] }}"></i>
+                            {{ $badge['label'] }}
+                        </span>
+                    </div>
+
+                    {{-- ===== INFORMASI UTAMA ===== --}}
+                    <div class="section-label">
+                        <span class="section-icon" style="background:#ebf0fd;">
+                            <i class="fas fa-info-circle" style="color:#3b5de7;"></i>
+                        </span>
+                        Informasi Utama
+                    </div>
+
+                    <div class="top-grid mb-4">
+                        {{-- Foto --}}
+                        <div class="img-box">
+                            @if($barang->foto)
+                                <img src="{{ asset('storage/' . $barang->foto) }}" alt="{{ $barang->nama_barang }}" class="detail-img">
+                            @else
+                                <div class="no-img">
+                                    <i class="fas fa-camera fa-2x"></i>
+                                    <span>Tidak ada foto</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Info Grid --}}
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label><i class="fas fa-box me-1"></i> Nama Barang</label>
+                                <div class="val">{{ $barang->nama_barang }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-tags me-1"></i> Kategori</label>
+                                <div class="val">
+                                    <span class="pill-kat">{{ $barang->kategori->nama_kategori }}</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-map-marker-alt me-1"></i> Lokasi</label>
+                                <div class="val">{{ $barang->lokasi->nama_lokasi }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-building me-1"></i> Bidang</label>
+                                <div class="val">{{ $barang->bidang->nama_bidang }}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Detail Content -->
-                    <div class="detail-content">
+                    <div class="section-divider"></div>
 
-                        <!-- Informasi Utama -->
-                        <div class="detail-section">
-                            <h5 class="section-title">
-                                <i class="fas fa-info-circle"></i>
-                                Informasi Utama
-                            </h5>
-                            <div class="row g-5">
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-box"></i>
-                                            Nama Barang
-                                        </label>
-                                        <div class="detail-value">{{ $barang->nama_barang }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-tags"></i>
-                                            Kategori
-                                        </label>
-                                        <div class="detail-value">
-                                            <span class="badge-kategori">{{ $barang->kategori->nama_kategori }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            Lokasi
-                                        </label>
-                                        <div class="detail-value">{{ $barang->lokasi->nama_lokasi }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-building"></i>
-                                            Bidang
-                                        </label>
-                                        <div class="detail-value">{{ $barang->bidang->nama_bidang }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Informasi Stok -->
-                        <div class="detail-section">
-                            <h5 class="section-title">
-                                <i class="fas fa-cubes"></i>
-                                Informasi Stok
-                            </h5>
-                            <div class="row g-5">
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-hashtag"></i>
-                                            Jumlah Total
-                                        </label>
-                                        <div class="detail-value">
-                                            <span class="badge-number">{{ $barang->jumlah_total }}</span>
-                                            <span class="unit-text">unit</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="detail-item">
-                                        <label class="detail-label">
-                                            <i class="fas fa-layer-group"></i>
-                                            Stok Tersedia
-                                        </label>
-                                        <div class="detail-value">
-                                            <span class="badge-number">{{ $barang->stok }}</span>
-                                            <span class="unit-text">unit</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Stock Bar Visualization -->
-                                <div class="col-12">
-                                    <div class="stock-visualization">
-                                        <div class="stock-label-group">
-                                            <span class="stock-label">Penggunaan Stok</span>
-                                            <span class="stock-percentage">
-                                                @php
-                                                    $percentage = $barang->jumlah_total > 0
-                                                        ? round(($barang->stok / $barang->jumlah_total) * 100)
-                                                        : 0;
-                                                @endphp
-                                                {{ $percentage }}%
-                                            </span>
-                                        </div>
-                                        <div class="stock-bar">
-                                            <div class="stock-bar-fill" style="width: {{ $percentage }}%">
-                                            </div>
-                                        </div>
-                                        <div class="stock-info">
-                                            <span class="stock-info-item">
-                                                <i class="fas fa-check-circle text-success"></i>
-                                                Tersedia: {{ $barang->stok }}
-                                            </span>
-                                            <span class="stock-info-item">
-                                                <i class="fas fa-arrow-circle-right text-warning"></i>
-                                                Terpakai: {{ $barang->jumlah_total - $barang->stok }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Informasi Kondisi -->
-                        <div class="detail-section">
-                            <h5 class="section-title">
-                                <i class="fas fa-clipboard-check"></i>
-                                Kondisi Barang
-                            </h5>
-                            <div class="row g-5">
-                                <div class="col-12">
-                                    <div class="kondisi-card" style="background: {{ $badge['bg'] }}; border-left: 4px solid {{ $badge['text'] }};">
-                                        <div class="kondisi-icon" style="color: {{ $badge['text'] }};">
-                                            <i class="fas fa-{{ $badge['icon'] }}"></i>
-                                        </div>
-                                        <div class="kondisi-content">
-                                            <div class="kondisi-status" style="color: {{ $badge['text'] }};">
-                                                {{ $badge['label'] }}
-                                            </div>
-                                            <div class="kondisi-description">
-                                                @if($barang->kondisi == 'baik')
-                                                    Barang dalam kondisi baik dan siap digunakan
-                                                @elseif($barang->kondisi == 'perlu_perbaikan')
-                                                    Barang memerlukan perbaikan atau pemeliharaan
-                                                @elseif($barang->kondisi == 'rusak')
-                                                    Barang rusak dan memerlukan penggantian atau perbaikan serius
-                                                @else
-                                                    Status kondisi barang
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                    {{-- ===== INFORMASI STOK ===== --}}
+                    <div class="section-label">
+                        <span class="section-icon" style="background:#f0ebfd;">
+                            <i class="fas fa-cubes" style="color:#764ba2;"></i>
+                        </span>
+                        Informasi Stok
                     </div>
 
-                    <!-- Action Buttons -->
+                    <div class="stok-grid mb-3">
+                        <div class="stok-card">
+                            <label><i class="fas fa-hashtag me-1"></i> Jumlah Total</label>
+                            <div class="stok-num-row">
+                                <span class="num-badge">{{ $barang->jumlah_total }}</span>
+                                <span class="stok-unit">unit</span>
+                            </div>
+                        </div>
+                        <div class="stok-card">
+                            <label><i class="fas fa-layer-group me-1"></i> Stok Tersedia</label>
+                            <div class="stok-num-row">
+                                <span class="num-badge">{{ $barang->stok }}</span>
+                                <span class="stok-unit">unit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @php
+                        $percentage = $barang->jumlah_total > 0
+                            ? round(($barang->stok / $barang->jumlah_total) * 100)
+                            : 0;
+                        $terpakai = $barang->jumlah_total - $barang->stok;
+                    @endphp
+
+                    <div class="bar-card mb-4">
+                        <div class="bar-top">
+                            <span>Penggunaan Stok</span>
+                            <strong>{{ $percentage }}%</strong>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:{{ $percentage }}%"></div>
+                        </div>
+                        <div class="bar-meta">
+                            <span class="txt-g"><span class="dot dot-g"></span> Tersedia: {{ $barang->stok }}</span>
+                            <span class="txt-o"><span class="dot dot-o"></span> Terpakai: {{ $terpakai }}</span>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    {{-- ===== KONDISI BARANG ===== --}}
+                    <div class="section-label">
+                        <span class="section-icon" style="background:#edf7f0;">
+                            <i class="fas fa-clipboard-check" style="color:#1e7e3e;"></i>
+                        </span>
+                        Kondisi Barang
+                    </div>
+
+                    <div class="kondisi-wrap mb-4"
+                         style="background:{{ $badge['bg'] }};border-color:{{ $badge['border'] }};border-left-color:{{ $badge['text'] }};">
+                        <div class="kondisi-icon-wrap" style="background:{{ $badge['border'] }};">
+                            <i class="fas fa-{{ $badge['icon'] }}" style="color:{{ $badge['text'] }};font-size:18px;"></i>
+                        </div>
+                        <div>
+                            <div class="kondisi-title" style="color:{{ $badge['text'] }};">{{ $badge['label'] }}</div>
+                            <div class="kondisi-desc" style="color:{{ $badge['text'] }};opacity:.8;">
+                                @if($barang->kondisi == 'baik') Barang dalam kondisi baik dan siap digunakan.
+                                @elseif($barang->kondisi == 'perlu_perbaikan') Barang memerlukan pemeliharaan rutin.
+                                @elseif($barang->kondisi == 'rusak') Barang rusak dan perlu penggantian.
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ===== ACTIONS ===== --}}
                     <div class="detail-actions">
                         <a href="{{ route('barang.index') }}" class="btn-back">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Kembali ke Daftar</span>
+                            <i class="fas fa-arrow-left me-2"></i>&nbsp; Kembali
                         </a>
-                        <div class="detail-actions-right">
-                            <a href="{{ route('barang.edit', $barang->id) }}" class="btn-edit">
-                                <i class="far fa-edit"></i>
-                                <span>Edit Barang</span>
-                            </a>
-                        </div>
+                        <a href="{{ route('barang.edit', $barang->id) }}" class="btn-edit text-decoration-none">
+                            <i class="far fa-edit me-2"></i> &nbsp;Edit Barang
+                        </a>
                     </div>
 
                 </div>
@@ -210,434 +166,337 @@
 </div>
 
 <style>
-/* ===== TYPOGRAPHY ===== */
-:root {
-    --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
-    --color-primary: #667eea;
-    --color-primary-dark: #5568d3;
-    --color-success: #10b981;
-    --color-danger: #ef4444;
-    --color-warning: #f59e0b;
-    --color-info: #17a2b8;
-    --color-gray-50: #fafafa;
-    --color-gray-100: #f3f4f6;
-    --color-gray-200: #e5e7eb;
-    --color-gray-300: #d1d5db;
-    --color-gray-400: #9ca3af;
-    --color-gray-500: #6b7280;
-    --color-gray-600: #4b5563;
-    --color-gray-700: #374151;
-    --color-gray-800: #1f2937;
-    --color-gray-900: #111827;
+/* =====================
+   FONT & BASE
+   ===================== */
+.detail-card,
+.detail-card * {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-body {
-    font-family: var(--font-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===== CARD ===== */
-.custom-card {
+/* =====================
+   CARD
+   ===================== */
+.detail-card {
     border: none;
     border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
     overflow: hidden;
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== DETAIL HEADER ===== */
+/* =====================
+   HEADER
+   ===================== */
 .detail-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding-bottom: 24px;
-    border-bottom: 2px solid var(--color-gray-100);
-    margin-bottom: 32px;
+    align-items: flex-start;
+    padding-bottom: 22px;
+    border-bottom: 1.5px solid #f0f2f7;
+    margin-bottom: 24px;
 }
-
 .detail-title {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--color-gray-900);
-    margin: 0 0 6px 0;
+    color: #1a1d2e;
+    margin: 0 0 4px;
 }
-
 .detail-subtitle {
-    font-size: 14px;
-    color: var(--color-gray-500);
+    font-size: 13px;
+    color: #8a92a6;
     margin: 0;
-    font-weight: 400;
 }
-
-.header-badge {
-    display: flex;
-    align-items: center;
-}
-
 .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    gap: 7px;
+    padding: 7px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
 }
 
-.status-badge i {
-    font-size: 16px;
-}
-
-/* ===== DETAIL CONTENT ===== */
-.detail-content {
-    padding-top: 8px;
-}
-
-.detail-section {
-    margin-bottom: 40px;
-}
-
-.detail-section:last-child {
-    margin-bottom: 0;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--color-gray-800);
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--color-gray-100);
-}
-
-.section-title i {
-    color: var(--color-primary);
-    font-size: 18px;
-}
-
-/* ===== DETAIL ITEMS ===== */
-.detail-item {
-    background: var(--color-gray-50);
-    padding: 18px 20px;
-    border-radius: 12px;
-    border: 1px solid var(--color-gray-200);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100%;
-}
-
-.detail-item:hover {
-    background: #fff;
-    border-color: var(--color-gray-300);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-}
-
-.detail-label {
+/* =====================
+   SECTION LABEL
+   ===================== */
+.section-label {
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    font-weight: 600;
-    color: var(--color-gray-500);
+    font-weight: 700;
+    color: #4a5568;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    letter-spacing: .6px;
+    margin-bottom: 16px;
 }
-
-.detail-label i {
-    font-size: 13px;
-    color: var(--color-gray-400);
-}
-
-.detail-value {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-gray-900);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ===== BADGES ===== */
-.badge-kategori {
-    display: inline-block;
-    padding: 6px 14px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-}
-
-.badge-number {
+.section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 60px;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+    flex-shrink: 0;
+    font-size: 14px;
+}
+.section-divider {
+    height: 1.5px;
+    background: #f0f2f7;
+    margin: 22px 0;
 }
 
-.unit-text {
+/* =====================
+   TOP GRID (foto + info)
+   ===================== */
+.top-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+}
+.img-box {
+    background: #f7f8fc;
+    border-radius: 14px;
+    border: 1.5px solid #e8eaf0;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+.no-img {
+    color: #b0b8cc;
     font-size: 13px;
-    color: var(--color-gray-500);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =====================
+   INFO GRID
+   ===================== */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.info-item {
+    background: #f7f8fc;
+    border-radius: 12px;
+    border: 1.5px solid #ebedf5;
+    padding: 14px 16px;
+}
+.info-item label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #9aa0b4;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    display: block;
+    margin-bottom: 7px;
+}
+.info-item .val {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1d2e;
+}
+.pill-kat {
+    background: #ebf0fd;
+    color: #3b5de7;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =====================
+   STOK
+   ===================== */
+.stok-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.stok-card {
+    background: #f7f8fc;
+    border-radius: 12px;
+    border: 1.5px solid #ebedf5;
+    padding: 16px 18px;
+}
+.stok-card label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #9aa0b4;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    display: block;
+    margin-bottom: 10px;
+}
+.stok-num-row {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+}
+.num-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 8px;
+}
+.stok-unit {
+    font-size: 13px;
+    color: #9aa0b4;
     font-weight: 500;
 }
 
-/* ===== STOCK VISUALIZATION ===== */
-.stock-visualization {
-    background: var(--color-gray-50);
-    padding: 24px;
+/* =====================
+   PROGRESS BAR
+   ===================== */
+.bar-card {
+    background: #f7f8fc;
     border-radius: 12px;
-    border: 1px solid var(--color-gray-200);
+    border: 1.5px solid #ebedf5;
+    padding: 18px 20px;
 }
-
-.stock-label-group {
+.bar-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
-
-.stock-label {
+.bar-top span {
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-gray-700);
+    color: #4a5568;
 }
-
-.stock-percentage {
-    font-size: 16px;
+.bar-top strong {
+    font-size: 13px;
     font-weight: 700;
-    color: var(--color-primary);
-    font-family: var(--font-mono);
+    color: #667eea;
 }
-
-.stock-bar {
-    width: 100%;
-    height: 12px;
-    background: var(--color-gray-200);
-    border-radius: 999px;
+.bar-track {
+    height: 8px;
+    background: #e2e6f0;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
 }
-
-.stock-bar-fill {
+.bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    border-radius: 999px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 8px;
+    transition: width .5s ease;
 }
-
-.stock-info {
+.bar-meta {
     display: flex;
-    gap: 24px;
+    gap: 20px;
     margin-top: 12px;
 }
-
-.stock-info-item {
+.bar-meta span {
+    font-size: 12px;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-gray-700);
 }
-
-.stock-info-item i {
-    font-size: 14px;
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
+.dot-g  { background: #22c55e; }
+.dot-o  { background: #f59e0b; }
+.txt-g  { color: #16a34a; }
+.txt-o  { color: #d97706; }
 
-/* ===== KONDISI CARD ===== */
-.kondisi-card {
+/* =====================
+   KONDISI
+   ===================== */
+.kondisi-wrap {
     display: flex;
-    gap: 20px;
-    padding: 24px;
+    align-items: center;
+    gap: 18px;
+    border: 1.5px solid transparent;
+    border-left-width: 5px;
     border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 18px 22px;
 }
-
-.kondisi-card:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+.kondisi-icon-wrap {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
-
-.kondisi-icon {
-    font-size: 48px;
-    line-height: 1;
-    opacity: 0.8;
-}
-
-.kondisi-content {
-    flex: 1;
-}
-
-.kondisi-status {
-    font-size: 20px;
+.kondisi-title {
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.3px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
-
-.kondisi-description {
-    font-size: 14px;
-    color: var(--color-gray-700);
+.kondisi-desc {
+    font-size: 13px;
     font-weight: 400;
-    line-height: 1.5;
 }
 
-/* ===== DETAIL ACTIONS ===== */
+/* =====================
+   ACTIONS
+   ===================== */
 .detail-actions {
     display: flex;
-    gap: 12px;
     justify-content: space-between;
     align-items: center;
-    margin-top: 40px;
-    padding-top: 24px;
-    border-top: 2px solid var(--color-gray-100);
+    padding-top: 22px;
+    border-top: 1.5px solid #f0f2f7;
 }
-
-.detail-actions-right {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-/* Back Button */
 .btn-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: #fff;
-    color: var(--color-gray-700);
-    border: 1.5px solid var(--color-gray-300);
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.btn-back:hover {
-    background: var(--color-gray-50);
-    color: var(--color-gray-900);
-    border-color: var(--color-gray-400);
-    transform: translateX(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.btn-back i {
     font-size: 13px;
-}
-
-/* Edit Button */
-.btn-edit {
+    font-weight: 600;
+    color: #6b7280;
+    border: 1.5px solid #dde0ea;
+    border-radius: 10px;
+    padding: 9px 20px;
+    background: #fff;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
-    color: #fff;
+    transition: background .15s;
+}
+.btn-back:hover { background: #f7f8fc; color: #374151; }
+.btn-edit {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff !important;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    padding: 10px 24px;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+    transition: opacity .15s;
 }
+.btn-edit:hover { opacity: .9; }
 
-.btn-edit:hover {
-    background: linear-gradient(135deg, var(--color-primary-dark) 0%, #6b3fa0 100%);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-edit:active {
-    transform: translateY(0);
-}
-
-.btn-edit i {
-    font-size: 14px;
-}
-
-/* ===== ANIMATIONS ===== */
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ===== RESPONSIVE ===== */
+/* =====================
+   RESPONSIVE
+   ===================== */
 @media (max-width: 768px) {
-    .detail-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    .detail-title {
-        font-size: 20px;
-    }
-
-    .detail-subtitle {
-        font-size: 13px;
-    }
-
-    .detail-actions {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .detail-actions-right {
-        width: 100%;
-    }
-
-    .btn-back,
-    .btn-edit {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .kondisi-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 16px;
-    }
-
-    .kondisi-icon {
-        font-size: 36px;
-    }
-
-    .stock-info {
-        flex-direction: column;
-        gap: 12px;
-    }
+    .top-grid { grid-template-columns: 1fr; }
+    .img-box  { height: 180px; }
+    .stok-grid { grid-template-columns: 1fr; }
+    .detail-header { flex-direction: column; gap: 14px; }
 }
 </style>
 

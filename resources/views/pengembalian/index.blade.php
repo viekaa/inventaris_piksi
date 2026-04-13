@@ -149,7 +149,6 @@
                                 <tr>
                                     <td colspan="8" class="text-center py-5">
                                         <div class="empty-state">
-                                            <i class="fas fa-inbox"></i>
                                             <p>Belum ada data pengembalian</p>
                                         </div>
                                     </td>

@@ -8,8 +8,9 @@ use App\Models\Lokasi;
 use App\Models\Bidang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // Penting untuk hapus file
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
+// PDF dihapus use-nya karena kita pakai global class seperti di PeminjamanController kamu
 
 class BarangController extends Controller
 {
@@ -36,6 +37,121 @@ class BarangController extends Controller
         return view('barang.index', ['barang' => $query->get()]);
     }
 
+    public function create()
+    {
+        $user = Auth::user();
+        return view('barang.create', [
+            'kategori' => Kategori::all(),
+            'lokasi'   => Lokasi::all(),
+            'bidang'   => $user->role == 'admin' ? Bidang::all() : Bidang::where('id', $user->bidang_id)->get()
+        ]);
+    }
+
+    public function store(Request $r)
+    {
+        $user = Auth::user();
+
+        $rules = [
+            'nama_barang'  => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,id',
+            'lokasi_id'    => 'required|exists:lokasis,id',
+            'jumlah_total' => 'required|integer|min:0',
+            'stok'         => 'required|integer|min:0|lte:jumlah_total',
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ];
+
+        if ($user->role == 'admin') {
+            $rules['bidang_id'] = 'required|exists:bidangs,id';
+        }
+
+        $validated = $r->validate($rules);
+
+        if ($r->hasFile('foto')) {
+            $validated['foto'] = $r->file('foto')->store('barang', 'public');
+        }
+
+        if ($user->role != 'admin') {
+            $validated['bidang_id'] = $user->bidang_id;
+        }
+
+        Barang::create($validated);
+
+        Alert::success('Berhasil', 'Barang berhasil ditambahkan!');
+        return redirect()->route('barang.index');
+    }
+
+    public function show(Barang $barang)
+    {
+        $this->authorizeBarang($barang);
+        return view('barang.show', compact('barang'));
+    }
+
+    public function edit(Barang $barang)
+    {
+        $this->authorizeBarang($barang);
+        $user = Auth::user();
+
+        return view('barang.edit', [
+            'barang'   => $barang,
+            'kategori' => Kategori::all(),
+            'lokasi'   => Lokasi::all(),
+            'bidang'   => $user->role == 'admin' ? Bidang::all() : Bidang::where('id', $user->bidang_id)->get()
+        ]);
+    }
+
+    public function update(Request $r, Barang $barang)
+    {
+        $this->authorizeBarang($barang);
+        $user = Auth::user();
+
+        $rules = [
+            'nama_barang'  => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,id',
+            'lokasi_id'    => 'required|exists:lokasis,id',
+            'jumlah_total' => 'required|integer|min:0',
+            'stok'         => 'required|integer|min:0|lte:jumlah_total',
+            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ];
+
+        if ($user->role == 'admin') {
+            $rules['bidang_id'] = 'required|exists:bidangs,id';
+        }
+
+        $validated = $r->validate($rules);
+
+        if ($r->hasFile('foto')) {
+            if ($barang->foto && Storage::disk('public')->exists($barang->foto)) {
+                Storage::disk('public')->delete($barang->foto);
+            }
+            $validated['foto'] = $r->file('foto')->store('barang', 'public');
+        }
+
+        if ($user->role != 'admin') {
+            unset($validated['bidang_id']);
+        }
+
+        $barang->update($validated);
+
+        Alert::success('Berhasil', 'Barang berhasil diperbarui!');
+        return redirect()->route('barang.index');
+    }
+
+    public function destroy(Barang $barang)
+    {
+        $this->authorizeBarang($barang);
+
+        if ($barang->foto && Storage::disk('public')->exists($barang->foto)) {
+            Storage::disk('public')->delete($barang->foto);
+        }
+
+        $barang->delete();
+        Alert::success('Berhasil', 'Barang berhasil dihapus!');
+        return redirect()->route('barang.index');
+    }
+
+    // --- SESUAI PATOKAN KAMU ---
     public function exportPdf()
     {
         $user   = Auth::user();
@@ -56,138 +172,15 @@ class BarangController extends Controller
             });
         }
 
+        // Pakai cara panggil view langsung sesuai patokan PeminjamanController kamu
         return view('pdf.barang', ['barang' => $query->get()]);
-    }
-
-    public function create()
-    {
-        $user = Auth::user();
-
-        return view('barang.create', [
-            'kategori' => Kategori::all(),
-            'lokasi'   => Lokasi::all(),
-            'bidang'   => $user->role == 'admin'
-                            ? Bidang::all()
-                            : Bidang::where('id', $user->bidang_id)->get()
-        ]);
-    }
-
-    public function store(Request $r)
-    {
-        $user = Auth::user();
-
-        $rules = [
-            'nama_barang'  => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,id',
-            'lokasi_id'    => 'required|exists:lokasis,id',
-            'jumlah_total' => 'required|integer|min:0',
-            'stok'         => 'required|integer|min:0',
-            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi foto
-        ];
-
-        if ($user->role == 'admin') {
-            $rules['bidang_id'] = 'required|exists:bidangs,id';
-        }
-
-        $validated = $r->validate($rules);
-
-        // Handle Upload Foto
-        if ($r->hasFile('foto')) {
-            $validated['foto'] = $r->file('foto')->store('barang', 'public');
-        }
-
-        $validated['bidang_id'] = $user->role == 'admin' ? $validated['bidang_id'] : $user->bidang_id;
-
-        Barang::create($validated);
-
-        Alert::success('Berhasil', 'Barang berhasil di tambahkan!');
-        return redirect()->route('barang.index');
-    }
-
-    public function show(Barang $barang)
-    {
-        $this->authorizeBarang($barang);
-        return view('barang.show', compact('barang'));
-    }
-
-    public function edit(Barang $barang)
-    {
-        $this->authorizeBarang($barang);
-
-        $user = Auth::user();
-
-        return view('barang.edit', [
-            'barang'   => $barang,
-            'kategori' => Kategori::all(),
-            'lokasi'   => Lokasi::all(),
-            'bidang'   => $user->role == 'admin'
-                            ? Bidang::all()
-                            : Bidang::where('id', $user->bidang_id)->get()
-        ]);
-    }
-
-    public function update(Request $r, Barang $barang)
-    {
-        $this->authorizeBarang($barang);
-
-        $user = Auth::user();
-
-        $rules = [
-            'nama_barang'  => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,id',
-            'lokasi_id'    => 'required|exists:lokasis,id',
-            'jumlah_total' => 'required|integer|min:0',
-            'stok'         => 'required|integer|min:0|lte:jumlah_total',
-            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-        ];
-
-        if ($user->role == 'admin') {
-            $rules['bidang_id'] = 'required|exists:bidangs,id';
-        }
-
-        $validated = $r->validate($rules);
-
-        // Handle Update Foto
-        if ($r->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($barang->foto) {
-                Storage::disk('public')->delete($barang->foto);
-            }
-            // Simpan foto baru
-            $validated['foto'] = $r->file('foto')->store('barang', 'public');
-        }
-
-        if ($user->role != 'admin') {
-            unset($validated['bidang_id']); // Pastikan bidang_id petugas tidak berubah sembarangan
-        }
-
-        $barang->update($validated);
-
-        Alert::success('Berhasil', 'Barang berhasil diperbarui!');
-        return redirect()->route('barang.index');
-    }
-
-    public function destroy(Barang $barang)
-    {
-        $this->authorizeBarang($barang);
-
-        // Hapus file fisik foto dari storage sebelum hapus data
-        if ($barang->foto) {
-            Storage::disk('public')->delete($barang->foto);
-        }
-
-        $barang->delete();
-        Alert::success('Berhasil', 'Barang berhasil dihapus!');
-        return redirect()->route('barang.index');
     }
 
     private function authorizeBarang($barang)
     {
         $user = Auth::user();
         if ($user->role == 'petugas' && $barang->bidang_id != $user->bidang_id) {
-            abort(403, 'Anda tidak memiliki akses ke barang dari bidang lain.');
+            abort(403, 'Anda tidak memiliki akses ke barang ini.');
         }
     }
 }
