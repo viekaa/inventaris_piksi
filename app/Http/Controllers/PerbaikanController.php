@@ -3,50 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\PengembalianDetail; // Import model detail
 use Illuminate\Http\Request;
 
 class PerbaikanController extends Controller
 {
     public function index()
     {
-        $perluPerbaikan = Barang::where('kondisi', 'perlu_perbaikan')
-            ->with(['kategori:id,nama_kategori', 'bidang:id,nama_bidang', 'lokasi:id,nama_lokasi'])
+        // Cari barang yang tercatat di riwayat pengembalian sebagai 'perlu_perbaikan'
+        $perluPerbaikan = PengembalianDetail::with(['pengembalian.peminjaman.barang.kategori', 'pengembalian.peminjaman.barang.bidang', 'pengembalian.peminjaman.barang.lokasi'])
+            ->where('kondisi', 'perlu_perbaikan')
             ->latest()
             ->get();
 
-        $rusak = Barang::where('kondisi', 'rusak')
-            ->with(['kategori:id,nama_kategori', 'bidang:id,nama_bidang', 'lokasi:id,nama_lokasi'])
+        // Cari barang yang tercatat di riwayat pengembalian sebagai 'rusak'
+        $rusak = PengembalianDetail::with(['pengembalian.peminjaman.barang.kategori', 'pengembalian.peminjaman.barang.bidang', 'pengembalian.peminjaman.barang.lokasi'])
+            ->where('kondisi', 'rusak')
             ->latest()
             ->get();
 
         return view('admin.perbaikan.index', compact('rusak', 'perluPerbaikan'));
     }
 
-    public function update(Request $r, Barang $barang)
+    public function update(Request $r, $id)
     {
         $r->validate([
             'kondisi' => 'required|in:baik,rusak,perlu_perbaikan',
         ]);
 
-        $kondisiLama = $barang->kondisi;
+        // Cari data di tabel detail pengembalian
+        $detail = PengembalianDetail::findOrFail($id);
+        $barang = $detail->pengembalian->peminjaman->barang;
         $kondisiBaru = $r->kondisi;
 
-        // Dari bermasalah → baik: stok bertambah 1 (barang sudah selesai diperbaiki)
-        if ($kondisiBaru === 'baik' && $kondisiLama !== 'baik') {
-            $barang->increment('stok');
-        }
+        // Jika di-update jadi 'baik', berarti barang sudah diperbaiki/bagus
+        if ($kondisiBaru === 'baik') {
+            // Tambah stok barang utamanya
+            $barang->increment('stok', $detail->jumlah);
 
-        // Dari baik → bermasalah: stok berkurang 1 (barang ditarik dari stok)
-        if ($kondisiBaru !== 'baik' && $kondisiLama === 'baik' && $barang->stok > 0) {
-            $barang->decrement('stok');
-        }
+            // Karena sudah baik, hapus catatan kerusakannya dari riwayat
+            $detail->delete();
 
-        $barang->update(['kondisi' => $kondisiBaru]);
+            $msg = 'Barang telah diperbaiki dan kembali ke stok.';
+        } else {
+            // Jika cuma ubah dari rusak ke perlu_perbaikan (atau sebaliknya)
+            $detail->update(['kondisi' => $kondisiBaru]);
+            $msg = 'Status kondisi berhasil diperbarui.';
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Kondisi barang berhasil diperbarui'
-                       . ($kondisiBaru === 'baik' ? ' dan stok bertambah 1.' : '.'),
+            'message' => $msg,
             'kondisi' => $kondisiBaru,
         ]);
     }
