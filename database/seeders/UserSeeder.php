@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
-                'name' => 'Giffari D.R',
+                'name' => 'Giffari Dwi Ramadhan',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
                 'bidang_id' => $adm->id,
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'akademik@piksi.com'],
             [
-                'name' => 'Ai Susi',
+                'name' => 'Ai Susi Susanti',
                 'password' => Hash::make('akademik123'),
                 'role' => 'petugas',
                 'bidang_id' => $akd->id,

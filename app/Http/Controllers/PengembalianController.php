@@ -9,6 +9,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class PengembalianController extends Controller
 {
@@ -84,7 +85,8 @@ class PengembalianController extends Controller
         $peminjaman = Peminjaman::with('barang')->findOrFail($r->peminjaman_id);
 
         if ($peminjaman->status === 'dikembalikan') {
-            return back()->with('error', 'Peminjaman ini sudah dikembalikan.');
+            Alert::error('Gagal', 'Peminjaman ini sudah dikembalikan.');
+            return back();
         }
 
         $jmlBaik      = (int) $r->kondisi['baik'];
@@ -119,15 +121,14 @@ class PengembalianController extends Controller
 
         $barang = $peminjaman->barang;
 
-        // Stok bertambah hanya dari barang yang BAIK
         if ($jmlBaik > 0) {
             $barang->increment('stok', $jmlBaik);
         }
 
-        // Kunci kondisi barang master tetap 'baik' agar tidak hilang dari tabel utama
         $barang->update(['kondisi' => 'baik']);
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil dicatat.');
+        Alert::success('Berhasil', 'Pengembalian berhasil dicatat.');
+        return redirect()->route('petugas.pengembalian.index');
     }
 
     public function show($id)
@@ -158,11 +159,10 @@ class PengembalianController extends Controller
             'catatan'                 => 'nullable|string',
         ]);
 
-        $barang = $pengembalian->peminjaman->barang;
+        $barang  = $pengembalian->peminjaman->barang;
         $jmlBaik = (int) $r->kondisi['baik'];
         $baikLama = (int) ($pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0);
 
-        // Koreksi Stok: Kurangi stok lama sebelum update data baru
         if ($baikLama > 0) $barang->decrement('stok', $baikLama);
 
         $pengembalian->update([
@@ -177,11 +177,11 @@ class PengembalianController extends Controller
             }
         }
 
-        // Tambah stok baru
         if ($jmlBaik > 0) $barang->increment('stok', $jmlBaik);
         $barang->update(['kondisi' => 'baik']);
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil diperbarui.');
+        Alert::success('Berhasil', 'Pengembalian berhasil diperbarui.');
+        return redirect()->route('petugas.pengembalian.index');
     }
 
     public function destroy(Pengembalian $pengembalian)
@@ -189,7 +189,7 @@ class PengembalianController extends Controller
         if (Auth::user()->role == 'admin') abort(403);
         $this->authorizePengembalian($pengembalian);
 
-        $barang = $pengembalian->peminjaman->barang;
+        $barang   = $pengembalian->peminjaman->barang;
         $baikLama = (int) ($pengembalian->details()->where('kondisi', 'baik')->value('jumlah') ?? 0);
 
         if ($baikLama > 0) $barang->decrement('stok', $baikLama);
@@ -200,7 +200,8 @@ class PengembalianController extends Controller
         $pengembalian->details()->delete();
         $pengembalian->delete();
 
-        return redirect()->route('petugas.pengembalian.index')->with('ok', 'Pengembalian berhasil dihapus.');
+        Alert::success('Berhasil', 'Pengembalian berhasil dihapus.');
+        return redirect()->route('petugas.pengembalian.index');
     }
 
     private function authorizePengembalian($pengembalian): void

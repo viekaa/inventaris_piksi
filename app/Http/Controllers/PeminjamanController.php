@@ -8,6 +8,7 @@ use App\Models\Jurusan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class PeminjamanController extends Controller
 {
@@ -93,7 +94,8 @@ class PeminjamanController extends Controller
         }
 
         if ($barang->stok < $r->jumlah) {
-            return back()->with('error', 'Stok tidak mencukupi');
+            Alert::error('Gagal', 'Stok tidak mencukupi');
+            return back();
         }
 
         Peminjaman::create([
@@ -111,7 +113,8 @@ class PeminjamanController extends Controller
 
         $barang->decrement('stok', $r->jumlah);
 
-        return redirect()->route('petugas.peminjaman.index')->with('ok', 'Peminjaman berhasil disimpan');
+        Alert::success('Berhasil', 'Peminjaman berhasil disimpan');
+        return redirect()->route('petugas.peminjaman.index');
     }
 
     public function show(Peminjaman $peminjaman)
@@ -153,7 +156,8 @@ class PeminjamanController extends Controller
             'tgl_pinjam', 'tgl_kembali_rencana', 'kondisi_saat_pinjam'
         ]));
 
-        return redirect()->route('petugas.peminjaman.index')->with('ok', 'Peminjaman berhasil diupdate');
+        Alert::success('Berhasil', 'Peminjaman berhasil diupdate');
+        return redirect()->route('petugas.peminjaman.index');
     }
 
     public function destroy(Peminjaman $peminjaman)
@@ -164,7 +168,8 @@ class PeminjamanController extends Controller
         $peminjaman->barang->increment('stok', $peminjaman->jumlah);
         $peminjaman->delete();
 
-        return back()->with('ok', 'Peminjaman dihapus dan stok dikembalikan');
+        Alert::success('Berhasil', 'Peminjaman dihapus dan stok dikembalikan');
+        return back();
     }
 
     private function onlyPetugas()
