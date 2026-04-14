@@ -190,30 +190,24 @@
                                     @enderror
                                 </div>
                             </div>
-
-                            <!-- Kondisi -->
-                            <div class="col-md-6">
-                                <div class="form-group-custom">
-                                    <label class="form-label">
-                                        Kondisi
-                                        <span class="required">*</span>
-                                    </label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-check-circle input-icon"></i>
-                                        <select name="kondisi"
-                                                class="form-control-custom @error('kondisi') is-invalid @enderror"
-                                                required>
-                                            <option value="" disabled selected>Pilih kondisi...</option>
-                                            <option value="baik" {{ old('kondisi') == 'baik' ? 'selected' : '' }}>Baik</option>
-                                            <option value="perlu_perbaikan" {{ old('kondisi') == 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
-                                            <option value="rusak" {{ old('kondisi') == 'rusak' ? 'selected' : '' }}>Rusak</option>
-                                        </select>
-                                    </div>
-                                    @error('kondisi')
-                                        <div class="error-message">{{ $message }}</div>
-                                    @enderror
+                           <!-- Kondisi -->
+                        <div class="col-md-6">
+                            <div class="form-group-custom">
+                                <label class="form-label">
+                                    Kondisi
+                                    <span class="badge-auto">Otomatis</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-check-circle input-icon"></i>
+                                    <input type="hidden" name="kondisi" value="baik">
+                                    <input type="text"
+                                        class="form-control-custom form-control-readonly"
+                                        value="Baik"
+                                        readonly>
                                 </div>
+                                <small class="form-text">Barang baru otomatis berkondisi baik</small>
                             </div>
+                        </div>
                         <div class="col-md-6">
                         <div class="form-group-custom">
                             <label class="form-label">

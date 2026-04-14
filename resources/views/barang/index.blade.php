@@ -23,7 +23,7 @@
 
                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h4 class="card-title mb-1">Data Barang</h4>
+                            <h4 class="card-title-barang mb-1">Data Barang</h4>
                             <p class="card-subtitle">Kelola inventori barang Anda</p>
                         </div>
 
@@ -246,9 +246,9 @@
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
-    .card-title {
+    .card-title-barang{
         font-size: 24px;
-        font-weight: 700;
+        font-weight: 400;
         letter-spacing: -0.5px;
         color: #1a1a1a;
         margin: 0;

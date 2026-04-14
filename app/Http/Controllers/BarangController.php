@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
-// PDF dihapus use-nya karena kita pakai global class seperti di PeminjamanController kamu
 
 class BarangController extends Controller
 {
@@ -43,7 +42,9 @@ class BarangController extends Controller
         return view('barang.create', [
             'kategori' => Kategori::all(),
             'lokasi'   => Lokasi::all(),
-            'bidang'   => $user->role == 'admin' ? Bidang::all() : Bidang::where('id', $user->bidang_id)->get()
+            'bidang'   => $user->role == 'admin'
+                ? Bidang::where('nama_bidang', '!=', 'Admin')->get()
+                : Bidang::where('id', $user->bidang_id)->get()
         ]);
     }
 
@@ -57,7 +58,6 @@ class BarangController extends Controller
             'lokasi_id'    => 'required|exists:lokasis,id',
             'jumlah_total' => 'required|integer|min:0',
             'stok'         => 'required|integer|min:0|lte:jumlah_total',
-            'kondisi'      => 'required|in:baik,rusak,perlu_perbaikan',
             'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ];
 
@@ -66,6 +66,9 @@ class BarangController extends Controller
         }
 
         $validated = $r->validate($rules);
+
+        // Kondisi selalu baik untuk barang baru
+        $validated['kondisi'] = 'baik';
 
         if ($r->hasFile('foto')) {
             $validated['foto'] = $r->file('foto')->store('barang', 'public');
@@ -96,7 +99,9 @@ class BarangController extends Controller
             'barang'   => $barang,
             'kategori' => Kategori::all(),
             'lokasi'   => Lokasi::all(),
-            'bidang'   => $user->role == 'admin' ? Bidang::all() : Bidang::where('id', $user->bidang_id)->get()
+            'bidang'   => $user->role == 'admin'
+                ? Bidang::where('nama_bidang', '!=', 'Admin')->get()
+                : Bidang::where('id', $user->bidang_id)->get()
         ]);
     }
 
@@ -151,7 +156,6 @@ class BarangController extends Controller
         return redirect()->route('barang.index');
     }
 
-    // --- SESUAI PATOKAN KAMU ---
     public function exportPdf()
     {
         $user   = Auth::user();
@@ -172,7 +176,6 @@ class BarangController extends Controller
             });
         }
 
-        // Pakai cara panggil view langsung sesuai patokan PeminjamanController kamu
         return view('pdf.barang', ['barang' => $query->get()]);
     }
 
