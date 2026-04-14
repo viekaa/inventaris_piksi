@@ -144,6 +144,29 @@
                             </div>
                             @endif
 
+                            <!-- Jumlah Total -->
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label class="form-label">
+                                        Jumlah Total
+                                        <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-hashtag input-icon"></i>
+                                        <input type="number"
+                                               class="form-control-custom @error('jumlah_total') is-invalid @enderror"
+                                               name="jumlah_total"
+                                               value="{{ old('jumlah_total') }}"
+                                               placeholder="0"
+                                               min="0"
+                                               required>
+                                    </div>
+                                    @error('jumlah_total')
+                                        <div class="error-message">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <!-- Stok -->
                             <div class="col-md-6">
                                 <div class="form-group-custom">
@@ -262,7 +285,6 @@
 
 body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
-/* ===== CARD ===== */
 .custom-card {
     border: none;
     border-radius: 16px;
@@ -271,7 +293,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
     animation: slideUp 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* ===== FORM HEADER ===== */
 .form-header {
     padding-bottom: 24px;
     border-bottom: 1px solid var(--color-gray-200);
@@ -293,7 +314,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
     font-weight: 400;
 }
 
-/* ===== FORM ===== */
 .custom-form { padding-top: 8px; }
 .form-group-custom { margin-bottom: 20px; }
 
@@ -322,7 +342,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
     margin-left: 6px;
 }
 
-/* ===== INPUT WRAPPER ===== */
 .input-wrapper { position: relative; }
 
 .input-icon {
@@ -337,7 +356,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
     transition: color 0.2s ease;
 }
 
-/* ===== FORM CONTROLS ===== */
 .form-control-custom {
     width: 100%;
     padding: 11px 14px 11px 40px;
@@ -362,7 +380,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
 
 .input-wrapper:focus-within .input-icon { color: var(--color-primary); }
 
-/* ===== READONLY ===== */
 .form-control-readonly {
     background: var(--color-gray-50) !important;
     color: var(--color-gray-500) !important;
@@ -384,7 +401,6 @@ body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; -m
     color: var(--color-gray-400);
 }
 
-/* ===== SELECT ===== */
 select.form-control-custom {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -404,17 +420,14 @@ select.form-control-custom:focus {
 select.form-control-custom option { background: #fff; color: var(--color-gray-800); }
 select.form-control-custom option:disabled { color: var(--color-gray-400); }
 
-/* ===== NUMBER INPUT ===== */
 input[type="number"].form-control-custom::-webkit-inner-spin-button,
 input[type="number"].form-control-custom::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"].form-control-custom { -moz-appearance: textfield; }
 
-/* ===== ERROR STATES ===== */
 .form-control-custom.is-invalid { border-color: var(--color-danger); background: #fef2f2; }
 .form-control-custom.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
 .error-message { display: block; margin-top: 5px; font-size: 12px; color: var(--color-danger); font-weight: 500; }
 
-/* ===== FORM ACTIONS ===== */
 .form-actions {
     display: flex;
     gap: 12px;
@@ -497,7 +510,6 @@ input[type="number"].form-control-custom { -moz-appearance: textfield; }
 
 .btn-submit:active, .btn-reset:active { transform: translateY(0); }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .form-actions { flex-direction: column; gap: 10px; }
     .form-actions-right { width: 100%; flex-direction: column-reverse; }
@@ -505,7 +517,6 @@ input[type="number"].form-control-custom { -moz-appearance: textfield; }
     .form-group-custom { margin-bottom: 16px; }
 }
 
-/* ===== ANIMATIONS ===== */
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
